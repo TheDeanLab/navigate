@@ -40,7 +40,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from math import ceil
+from math import ceil, isfinite
 from typing import Any
 
 
@@ -204,6 +204,40 @@ class StackGeometry:
             raise ValueError("Z and focus must have the same plane count")
 
     @classmethod
+    def relative(
+        cls,
+        extent: float,
+        step: float,
+        *,
+        flipped: bool = False,
+        start_focus: float = 0.0,
+        end_focus: float = 0.0,
+    ) -> StackGeometry:
+        """Build a centered stack, with focus offsets in acquisition order.
+
+        Parameters
+        ----------
+        extent, step : float
+            Positive requested range and step magnitude, in micrometers.
+        flipped : bool, optional
+            Acquire from the positive boundary toward the negative boundary.
+        start_focus, end_focus : float, optional
+            Focus offsets relative to the reference focus; zero keeps it constant.
+        """
+        if not all(isfinite(v) for v in (extent, step, start_focus, end_focus)):
+            raise ValueError("Relative stack values must be finite numbers")
+        if extent <= 0 or step <= 0:
+            raise ValueError("Relative stack range and step must be positive")
+        half = extent / 2
+        z = StackAxis.from_bounds(
+            half if flipped else -half,
+            -half if flipped else half,
+            step,
+            flipped=flipped,
+        )
+        return cls(z, StackAxis.focus_ramp(start_focus, end_focus, z.count))
+
+    @classmethod
     def from_legacy_state(cls, state: Mapping[str, Any]) -> StackGeometry:
         """Snapshot the existing acquisition fields without recomputing their count."""
         z = StackAxis.from_legacy_z(state)
@@ -238,6 +272,21 @@ class StackGeometry:
     def first_plane(self, reference: StackReference) -> tuple[float, float] | None:
         """Return the first sampled plane, or None for an empty preview."""
         return self.position(reference, 0) if self.z.count > 0 else None
+
+    def legacy_fields(self, reference: StackReference) -> dict[str, float | int]:
+        """Represent resolved geometry in the existing experiment/saving schema."""
+        return {
+            "start_position": self.z.start,
+            "end_position": self.z.end,
+            "step_size": self.z.step,
+            "number_z_steps": self.z.count,
+            "start_focus": self.focus.start,
+            "end_focus": self.focus.end,
+            "stack_z_origin": reference.z,
+            "stack_focus_origin": reference.focus,
+            "abs_z_start": reference.z + min(self.z.start, self.z.end),
+            "abs_z_end": reference.z + max(self.z.start, self.z.end),
+        }
 
     def last_plane(self, reference: StackReference) -> tuple[float, float] | None:
         """Return the last sampled plane, distinct from the requested end boundary."""

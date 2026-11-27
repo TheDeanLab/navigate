@@ -79,7 +79,39 @@ Stack Acquisition Settings
 
 This section defines Z-stack geometry and sequencing.
 
-1. :guilabel:`Start` / :guilabel:`End` are relative stack bounds.
+Choose :guilabel:`Absolute` to keep fixed start and end positions. This is the
+default for existing experiments. Start and end can be captured in either order.
+
+Choose :guilabel:`Relative` for a stack centered on the current stage position:
+
+1. Enter the total :guilabel:`Range (µm)`. A range of 500 requests offsets from
+   −250 to +250 µm around the center.
+2. Set the :guilabel:`Step Size`. The existing sampling convention is retained:
+   with a 1 µm step, this example acquires 500 planes, ending one step before the
+   requested end boundary. Reversed stage directions reverse the acquisition.
+3. Leave :guilabel:`Focus ramp` unchecked to keep reference focus constant.
+   Channel defocus settings still apply. Enable it to enter start and end focus
+   offsets relative to the reference focus, in acquisition order.
+4. Position the sample and press :guilabel:`Acquire`. The preview follows the
+   latest displayed readback while idle. Acquisition obtains a fresh hardware
+   readback and freezes its reference and sampling for all channels and timepoints.
+
+The relative schematic marks the center, requested boundaries, and last sampled
+plane. With multiposition enabled, offsets apply independently to each position
+table row. The table is captured at acquisition start, so movement between tiles
+does not recenter the next stack. Limits are checked for every tile, channel
+focus offset, and secondary stacking axis before camera preparation.
+
+Changing position mode does not move hardware. Returning to Absolute restores
+the previously entered fixed endpoints; relative range and focus settings are
+also retained when saving and reloading an experiment. A new acquisition after
+changing microscopes obtains a new reference in the selected microscope's
+coordinates. Run autofocus before Acquire to use its updated focus position.
+Relative mode is available for standard Z-stack acquisition; select Absolute
+for custom acquisition workflows. Acquisition-progress animation is not included
+in this release.
+
+1. In Absolute mode, :guilabel:`Start` / :guilabel:`End` show offsets from the fixed stack reference; the schematic shows the corresponding physical bounds.
 2. :guilabel:`Set Start Pos/Foc` and :guilabel:`Set End Pos/Foc` read current stage values.
 3. :guilabel:`Step Size` sets spacing in microns; :guilabel:`# slices` updates automatically.
 4. :guilabel:`Z-Stack Device` selects the primary Z-stack stage. When multiple stages can move along the Z direction, this is the stage that steps through the planes of the stack.

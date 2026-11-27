@@ -78,6 +78,19 @@ def physical_pairs(controller: ChannelsTabController) -> list[tuple[float, float
     ]
 
 
+def use_equivalent_relative_geometry(controller, flipped=False):
+    """Represent the same 100..300 / 10..30 stack through relative controls."""
+    controller.parent_controller.configuration["experiment"]["StageParameters"].update(
+        z=200, f=20
+    )
+    frame = controller.view.stack_acq_frame
+    frame.position_mode.set("Relative")
+    frame.relative_range.set(200)
+    frame.relative_focus_ramp.set(True)
+    controller.stack_acq_vals["start_focus"].set(10 if flipped else -10)
+    controller.stack_acq_vals["end_focus"].set(-10 if flipped else 10)
+
+
 @pytest.mark.parametrize("button", ["start", "end"])
 @pytest.mark.parametrize("flipped", [False, True])
 def test_first_capture_after_load_reanchors_uncaptured_offsets(
@@ -279,17 +292,21 @@ def test_selected_axes_and_device_round_trip_reset_capture_assignments(controlle
 
 
 @pytest.mark.parametrize("buttons", [("start", "end"), ("end", "start")])
+@pytest.mark.parametrize("relative", [False, True])
 def test_tiling_retains_stack_offsets_and_tile_coverage(
-    controller, buttons, monkeypatch
+    controller, buttons, monkeypatch, relative
 ):
     for button in buttons:
         capture(controller, button, *{"start": (100, 10), "end": (300, 30)}[button])
+    if relative:
+        use_equivalent_relative_geometry(controller)
     wizard = TilingWizardController.__new__(TilingWizardController)
     wizard.parent_controller = controller
     wizard.primary_z_axis, wizard.primary_f_axis = "z", "f"
     wizard._axes = ["x", "y", "z", "f"]
     wizard._percent_overlap = 10
     wizard.is_validated = dict.fromkeys(wizard._axes, True)
+    wizard.stack_acq_frame = controller.view.stack_acq_frame
     wizard.stack_acq_widgets = controller.stack_acq_widgets
     wizard.stage_position_vars = {"theta": SimpleNamespace(get=lambda: 0)}
     wizard.multipoint_table = object()
@@ -384,8 +401,9 @@ def test_microscope_switch_keeps_offsets_and_resets_capture_context(
 @pytest.mark.parametrize("ext", ["h5", "n5"])
 @pytest.mark.parametrize("buttons", [("start", "end"), ("end", "start")])
 @pytest.mark.parametrize("positions,timepoints", [(2, 1), (1, 2)])
+@pytest.mark.parametrize("relative", [False, True])
 def test_bdv_saved_geometry_matches_legacy_stack(
-    controller, tmp_path, ext, buttons, positions, timepoints, flipped
+    controller, tmp_path, ext, buttons, positions, timepoints, flipped, relative
 ):
     """Save actual BDV volumes using the captured state and check pixels and XML."""
     controller.parent_controller.configuration_controller.microscope_config["stage"][
@@ -393,6 +411,8 @@ def test_bdv_saved_geometry_matches_legacy_stack(
     ] = flipped
     for button in buttons:
         capture(controller, button, *{"start": (100, 10), "end": (300, 30)}[button])
+    if relative:
+        use_equivalent_relative_geometry(controller, flipped)
     configuration = controller.parent_controller.configuration
     state = controller.microscope_state_dict
     state.update(

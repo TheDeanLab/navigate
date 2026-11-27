@@ -44,6 +44,7 @@ import numpy as np
 
 # Local Imports
 from navigate.model.concurrency.concurrency_tools import SharedNDArray
+from navigate.model.stack_acquisition import RelativeStackPlan, freeze_relative_stack
 from navigate.model.devices.camera.format import (
     CameraImageFormat,
     CameraSettingCapability,
@@ -222,6 +223,8 @@ class Model:
 
         #: bool: Is the model acquiring?
         self.is_acquiring = False
+        #: Optional[RelativeStackPlan]: References frozen for a relative acquisition.
+        self._relative_stack_plan: RelativeStackPlan | None = None
 
         #: float: Current focus position.
         self.f_position = None
@@ -1468,14 +1471,23 @@ class Model:
             return False
         return r
 
-    def get_stage_position(self) -> Dict[str, Any]:
+    def get_stage_position(self, *, require_fresh: bool = False) -> Dict[str, Any]:
         """Get the position of the stage.
+
+        Parameters
+        ----------
+        require_fresh : bool, optional
+            Require complete device replies instead of using the acquisition cache.
 
         Returns
         -------
         ret_pos_dict : dict
             Dictionary of stage positions.
         """
+        if require_fresh:
+            if self.active_microscope is None:
+                raise RuntimeError("A microscope must be loaded before reading stages")
+            return self.active_microscope.get_stage_position(require_fresh=True)
         return self.active_microscope.get_stage_position()
 
     @suspend_stage_polling
@@ -1581,6 +1593,7 @@ class Model:
         Sets the current channel to 0, clears the signal and data containers,
         disconnects buffer in live mode and closes the shutters."""
         self.is_acquiring = False
+        self._relative_stack_plan = None
 
         def close_writer(writer: ImageWriter) -> None:
             try:
@@ -1887,6 +1900,30 @@ class Model:
         bool
             Was the preparation successful?
         """
+        relative_prepared = False
+        if turn_off_flags:
+            self._relative_stack_plan = None
+            state = (
+                self.configuration["experiment"]["MicroscopeState"]
+                if self.configuration is not None
+                else {}
+            )
+            if (
+                self.imaging_mode == "customized"
+                and state.get("stack_position_mode", "absolute") == "relative"
+            ):
+                self.is_acquiring = False
+                raise ValueError("Customized acquisitions require Absolute stack mode")
+            if (
+                self.imaging_mode == "z-stack"
+                and state.get("stack_position_mode", "absolute") == "relative"
+            ):
+                try:
+                    self._relative_stack_plan = freeze_relative_stack(self)
+                    relative_prepared = True
+                except Exception:
+                    self.is_acquiring = False
+                    raise
         # turn off flags
         if turn_off_flags:
             self.stop_acquisition = False
@@ -1914,7 +1951,8 @@ class Model:
             self.virtual_microscopes[m].prepare_acquisition()
 
         # Confirm stage position and software are in agreement.
-        self.stop_stage()
+        if not relative_prepared:
+            self.stop_stage()
 
         # prepare active microscope
         waveform_dict = self.active_microscope.prepare_acquisition()

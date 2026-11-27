@@ -40,7 +40,7 @@ from pathlib import Path
 # Third Party Imports
 
 # Local Imports
-from navigate.view.custom_widgets.hover import HoverButton
+from navigate.view.custom_widgets.hover import HoverButton, Hover
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.common import (
@@ -49,6 +49,7 @@ from navigate.view.custom_widgets.common import (
     uniform_grid,
 )
 from navigate.view.theme import (
+    get_theme_color,
     get_theme_padding_px,
     get_theme_preset,
     get_theme_spacing,
@@ -576,16 +577,48 @@ class StackAcquisitionFrame(ttk.Labelframe):
         #: dict: Dictionary of variables in the frame
         self.additional_stack_setting_variables = {}
 
+        self.position_mode = tk.StringVar(value="Absolute")
+        self.relative_range = tk.DoubleVar(value=500)
+        self.relative_focus_ramp = tk.BooleanVar(value=False)
+        self.mode_frame = ttk.Frame(self)
+        self.mode_frame.grid(row=0, column=0, sticky=tk.EW)
+        ttk.Label(self.mode_frame, text="Position mode").grid(row=0, column=0, padx=6)
+        self.position_mode_widget = ttk.Combobox(
+            self.mode_frame,
+            textvariable=self.position_mode,
+            values=("Absolute", "Relative"),
+            state="readonly",
+            width=10,
+        )
+        self.position_mode_widget.grid(row=0, column=1, padx=6)
+        self.relative_controls = ttk.Frame(self.mode_frame)
+        self.relative_controls.grid(row=0, column=2, sticky=tk.W)
+        self.relative_range_widget = LabelInput(
+            self.relative_controls,
+            label="Range (µm)",
+            input_class=ValidatedSpinbox,
+            input_var=self.relative_range,
+            input_args={"width": 8, "from_": 0.01, "to": 1000000, "increment": 1},
+        )
+        self.relative_range_widget.grid(row=0, column=0, padx=6)
+        self.relative_focus_ramp_widget = ttk.Checkbutton(
+            self.relative_controls,
+            text="Focus ramp",
+            variable=self.relative_focus_ramp,
+        )
+        self.relative_focus_ramp_widget.grid(row=0, column=1, padx=6)
+        self.relative_controls.grid_remove()
+
         self.stack_frame = ttk.Frame(self)
         self.additional_stack_frame = ttk.Frame(self)
         themed_grid(
             self.stack_frame,
-            row=0,
+            row=1,
             column=0,
             sticky=tk.NSEW,
             pady=(0, "layout_section_gap"),
         )
-        themed_grid(self.additional_stack_frame, row=1, column=0, sticky=tk.NSEW)
+        themed_grid(self.additional_stack_frame, row=2, column=0, sticky=tk.NSEW)
 
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
@@ -596,7 +629,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
         start_labels = ["Pos", "Foc"]
 
         #: ttk.Label: The label for the start position frame
-        start_label = ttk.Label(self.stack_frame, text="Start")
+        start_label = self.start_label = ttk.Label(self.stack_frame, text="Start")
         start_label.grid(row=0, column=0, sticky="S")
         for i in range(len(start_names)):
             self.inputs[start_names[i]] = LabelInput(
@@ -632,7 +665,7 @@ class StackAcquisitionFrame(ttk.Labelframe):
         end_labels = ["Pos", "Foc"]
 
         #: ttk.Label: The label for the end position
-        end_label = ttk.Label(self.stack_frame, text="End")
+        end_label = self.end_label = ttk.Label(self.stack_frame, text="End")
         end_label.grid(row=0, column=1, sticky="S")
         for i in range(len(end_names)):
             self.inputs[end_names[i]] = LabelInput(
@@ -827,6 +860,15 @@ class StackAcquisitionFrame(ttk.Labelframe):
             pady=get_theme_padding_px((5, 0)),
         )
 
+        self.relative_schematic = tk.Canvas(
+            self.cubic_frame,
+            width=230,
+            height=175,
+            highlightthickness=0,
+            background=get_theme_color("panel_bg", "#1a212b"),
+        )
+        self.relative_schematic_hover = Hover(self.relative_schematic)
+
         self.inputs["top"] = LabelInput(
             parent=self.cubic_frame,
             label="",
@@ -921,6 +963,88 @@ class StackAcquisitionFrame(ttk.Labelframe):
         # self.inputs["abs_z_end"].widget.hover.setdescription(
         #     "The absolute Z end position for the Z-stack."
         # )
+
+    def configure_position_mode(
+        self, relative: bool, ramp: bool, editable: bool
+    ) -> None:
+        """Show the controls appropriate to fixed endpoints or a centered range."""
+        self.position_mode_widget.configure(
+            state="readonly" if editable else "disabled"
+        )
+        self.relative_range_widget.widget.configure(
+            state="normal" if editable else "disabled"
+        )
+        self.relative_focus_ramp_widget.configure(
+            state="normal" if editable else "disabled"
+        )
+        self.start_label.configure(text="Start offset" if relative else "Start")
+        self.end_label.configure(text="End offset" if relative else "End")
+        if relative:
+            self.relative_controls.grid()
+            self.cubic_image_label.grid_remove()
+            self.relative_schematic.grid(row=0, rowspan=2, column=0, columnspan=2)
+        else:
+            self.relative_controls.grid_remove()
+            self.relative_schematic.grid_remove()
+            self.cubic_image_label.grid()
+        for endpoint in ("start", "end"):
+            self.inputs[f"{endpoint}_position"].widget.configure(
+                state=(
+                    "readonly"
+                    if relative and editable
+                    else ("normal" if editable else "disabled")
+                )
+            )
+            focus = self.inputs[f"{endpoint}_focus"]
+            focus.widget.configure(state="normal" if editable else "disabled")
+            if relative and not ramp:
+                focus.grid_remove()
+            else:
+                focus.grid()
+            button = self.buttons[f"set_{endpoint}"]
+            button.configure(state="disabled" if relative else "normal")
+            if relative:
+                button.grid_remove()
+            else:
+                button.grid()
+
+    def draw_relative_stack(
+        self,
+        extent: float,
+        center: float,
+        last: float,
+        *,
+        multiposition: bool = False,
+        frozen: bool = False,
+    ) -> None:
+        """Draw signed boundaries and the reference without querying hardware."""
+        canvas = self.relative_schematic
+        canvas.delete("all")
+        color = get_theme_color("text", "#d7dee8")
+        accent = get_theme_color("accent", "#4b78b8")
+        canvas.create_rectangle(12, 28, 90, 125, outline=color)
+        canvas.create_line([12, 28, 32, 12, 110, 12, 90, 28], fill=color)
+        canvas.create_line([110, 12, 110, 109, 90, 125], fill=color)
+        canvas.create_line(12, 76, 110, 76, fill=accent, width=2)
+        sample_y = 125 - (last - center + extent / 2) / extent * 97
+        canvas.create_line(12, sample_y, 90, sample_y, fill=color, dash=(3, 3))
+        for y, text in ((28, f"+{extent / 2:g} µm"), (125, f"−{extent / 2:g} µm")):
+            canvas.create_text(120, y, text=text, anchor="w", fill=color)
+        canvas.create_text(120, 76, text="Center", anchor="w", fill=accent)
+        caption = "Each table position" if multiposition else f"Center: {center:g} µm"
+        canvas.create_text(115, 142, text=caption, fill=color)
+        status = "Frozen at Acquire" if frozen else "Follows current position"
+        canvas.create_text(
+            115,
+            157,
+            text=status if not multiposition else "Offsets from each row",
+            fill=color,
+        )
+        self.relative_schematic_hover.setdescription(
+            f"Dashed line: last sampled {'offset' if multiposition else 'Z'} "
+            f"{last - center if multiposition else last:g} µm. "
+            "The requested end boundary is not included in the sampled planes."
+        )
 
     def create_additional_stack_widgets(self, axes: list, devices: dict) -> None:
         """Create the additional stack widgets.

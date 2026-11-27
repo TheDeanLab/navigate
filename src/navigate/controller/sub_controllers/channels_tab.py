@@ -47,7 +47,7 @@ from navigate.controller.sub_controllers.channels_settings import (
     ChannelSettingController,
 )
 from navigate.controller.sub_controllers.tiling import TilingWizardController
-from navigate.tools.stack_geometry import StackAxis
+from navigate.tools.stack_geometry import StackAxis, StackGeometry, StackReference
 from navigate.view.main_window_content.channels_tab import ChannelsTab
 from navigate.view.popups.tiling_wizard_popup import TilingWizardPopup
 
@@ -80,6 +80,8 @@ class ChannelsTabController(GUIController):
 
         #: str: The current acquisition mode.
         self.mode = "stop"
+        #: str: Validation failure for the current relative stack preview.
+        self._relative_stack_error = ""
 
         #: bool: Whether the controller is in the initialization phase.
         self.in_initialization = True
@@ -118,6 +120,10 @@ class ChannelsTabController(GUIController):
             command=self.update_start_position
         )
         self.stack_acq_buttons["set_end"].configure(command=self.update_end_position)
+        frame = self.view.stack_acq_frame
+        frame.position_mode.trace_add("write", self.change_stack_position_mode)
+        frame.relative_range.trace_add("write", self.update_z_steps)
+        frame.relative_focus_ramp.trace_add("write", self.update_z_steps)
 
         # stack acquisition_variables
         #: float: The z origin of the stack.
@@ -254,6 +260,21 @@ class ChannelsTabController(GUIController):
                 "step_size"
             ]
         self.set_info(self.stack_acq_vals, self.microscope_state_dict)
+        frame = self.view.stack_acq_frame
+        frame.position_mode.set(
+            self.microscope_state_dict.get("stack_position_mode", "absolute").title()
+        )
+        frame.relative_range.set(
+            self.microscope_state_dict.get("relative_stack_range", 500)
+        )
+        frame.relative_focus_ramp.set(
+            self.microscope_state_dict.get("relative_focus_ramp", False)
+        )
+        if self._relative_stack_mode():
+            for endpoint in ("start", "end"):
+                self.stack_acq_vals[f"{endpoint}_focus"].set(
+                    self.microscope_state_dict.get(f"relative_{endpoint}_focus", 0)
+                )
         self.set_info(self.timepoint_vals, self.microscope_state_dict)
 
         # set advanced stack acquistion settings
@@ -322,6 +343,8 @@ class ChannelsTabController(GUIController):
         ][primary_f_axis]
         self.update_stack_position_limits()
         self.update_z_steps()
+
+        self._configure_stack_position_mode()
 
         self.show_verbose_info("Channels tab has been set new values")
 
@@ -553,6 +576,202 @@ class ChannelsTabController(GUIController):
             self.enable_multiposition_btn()
 
         self.show_verbose_info("acquisition mode has been changed to", mode)
+        self._configure_stack_position_mode()
+        if mode == "stop":
+            self.refresh_stack_reference_preview()
+
+    def _relative_stack_mode(self) -> bool:
+        """Return whether this experiment uses a live relative reference."""
+        return (
+            self.microscope_state_dict.get("stack_position_mode", "absolute")
+            == "relative"
+        )
+
+    def _configure_stack_position_mode(self) -> None:
+        frame = self.view.stack_acq_frame
+        editable = self.mode == "stop" and self.microscope_state_dict.get(
+            "image_mode"
+        ) not in ("live", "single")
+        frame.configure_position_mode(
+            self._relative_stack_mode(), bool(frame.relative_focus_ramp.get()), editable
+        )
+        stage = getattr(self.parent_controller, "stage_controller", None)
+        if stage is not None and getattr(stage, "view", None) is not None:
+            for button in (
+                stage.view.stack_shortcuts.set_start_button,
+                stage.view.stack_shortcuts.set_end_button,
+            ):
+                button.configure(
+                    state="disabled" if self._relative_stack_mode() else "normal"
+                )
+
+    def change_stack_position_mode(self, *_: tuple[str]) -> None:
+        """Switch modes without moving hardware or losing fixed endpoint settings."""
+        if self.in_initialization or self.mode != "stop":
+            return
+        frame = self.view.stack_acq_frame
+        new_mode = frame.position_mode.get().lower()
+        old_mode = self.microscope_state_dict.get("stack_position_mode", "absolute")
+        if new_mode == old_mode or new_mode not in ("absolute", "relative"):
+            return
+        state = self.microscope_state_dict
+        if old_mode == "absolute":
+            state["absolute_stack_settings"] = {
+                key: state[key]
+                for key in (
+                    "start_position",
+                    "end_position",
+                    "start_focus",
+                    "end_focus",
+                    "step_size",
+                    "stack_z_origin",
+                    "stack_focus_origin",
+                )
+            }
+            state["absolute_stack_context"] = (
+                self.parent_controller.configuration_controller.microscope_name,
+                self._get_stack_axis("z_device", "z"),
+                self._get_stack_axis("f_device", "f"),
+            )
+        state["stack_position_mode"] = new_mode
+        self._stack_endpoint_context = None
+        self.in_initialization = True
+        try:
+            if new_mode == "absolute":
+                saved = state.get("absolute_stack_settings", {})
+                self.z_origin = saved.get("stack_z_origin", self.z_origin)
+                self.focus_origin = saved.get("stack_focus_origin", self.focus_origin)
+                context = (
+                    self.parent_controller.configuration_controller.microscope_name,
+                    self._get_stack_axis("z_device", "z"),
+                    self._get_stack_axis("f_device", "f"),
+                )
+                if tuple(state.get("absolute_stack_context", context)) != context:
+                    positions = self.parent_controller.configuration["experiment"][
+                        "StageParameters"
+                    ]
+                    self.z_origin, self.focus_origin = (
+                        positions[context[1]],
+                        positions[context[2]],
+                    )
+                for key in (
+                    "start_position",
+                    "end_position",
+                    "start_focus",
+                    "end_focus",
+                    "step_size",
+                ):
+                    if key in saved:
+                        self.stack_acq_vals[key].set(
+                            abs(saved[key]) if key == "step_size" else saved[key]
+                        )
+            else:
+                for endpoint in ("start", "end"):
+                    self.stack_acq_vals[f"{endpoint}_focus"].set(
+                        state.get(f"relative_{endpoint}_focus", 0)
+                    )
+        finally:
+            self.in_initialization = False
+        self._configure_stack_position_mode()
+        self.update_stack_position_limits()
+        self.update_z_steps()
+
+    def refresh_stack_reference_preview(self) -> None:
+        """Follow confirmed GUI readbacks while idle; acquisition owns its reference."""
+        if (
+            not self.in_initialization
+            and self.mode == "stop"
+            and self._relative_stack_mode()
+        ):
+            self.update_z_steps()
+
+    def _update_relative_stack(self) -> None:
+        if self.mode != "stop":
+            return
+        frame = self.view.stack_acq_frame
+        state = self.microscope_state_dict
+        self._relative_stack_error = ""
+        try:
+            z_axis = self._get_stack_axis("z_device", "z")
+            f_axis = self._get_stack_axis("f_device", "f")
+            positions = self.parent_controller.configuration["experiment"][
+                "StageParameters"
+            ]
+            reference = StackReference(
+                float(positions[z_axis]), float(positions[f_axis])
+            )
+            ramp = bool(frame.relative_focus_ramp.get())
+            step = float(self.stack_acq_vals["step_size"].get())
+            if step < float(self.stack_acq_widgets["step_size"].widget.cget("from")):
+                raise ValueError("Step size is below the configured minimum")
+            geometry = StackGeometry.relative(
+                float(frame.relative_range.get()),
+                step,
+                flipped=self.parent_controller.configuration_controller.stage_flip_flags[
+                    z_axis
+                ],
+                start_focus=(
+                    float(self.stack_acq_vals["start_focus"].get()) if ramp else 0
+                ),
+                end_focus=float(self.stack_acq_vals["end_focus"].get()) if ramp else 0,
+            )
+        except (tk.TclError, ValueError, TypeError, KeyError, OverflowError) as error:
+            self._relative_stack_error = f"Invalid relative stack settings: {error}"
+            self.stack_acq_vals["number_z_steps"].set(0)
+            state["number_z_steps"] = 0
+            return
+        self.z_origin, self.focus_origin = reference.z, reference.focus
+        state.update(geometry.legacy_fields(reference))
+        state["relative_stack_range"] = float(frame.relative_range.get())
+        state["relative_focus_ramp"] = ramp
+        if ramp:
+            state["relative_start_focus"] = geometry.focus.start
+            state["relative_end_focus"] = geometry.focus.end
+        self.in_initialization = True
+        try:
+            self.stack_acq_vals["start_position"].set(geometry.z.start)
+            self.stack_acq_vals["end_position"].set(geometry.z.end)
+            self.stack_acq_vals["number_z_steps"].set(geometry.z.count)
+            multi = bool(state["is_multiposition"])
+            self.stack_acq_vals["bottom"].set(
+                -state["relative_stack_range"] / 2 if multi else state["abs_z_start"]
+            )
+            self.stack_acq_vals["top"].set(
+                state["relative_stack_range"] / 2 if multi else state["abs_z_end"]
+            )
+        finally:
+            self.in_initialization = False
+        self._configure_stack_position_mode()
+        frame.draw_relative_stack(
+            state["relative_stack_range"],
+            reference.z,
+            geometry.position(reference, geometry.z.count - 1)[0],
+            multiposition=multi,
+        )
+        self.update_timepoint_setting()
+
+    def set_stack_reference(self, reference: dict[str, Any]) -> None:
+        """Display the model's frozen reference after successful acquisition preflight."""
+        if (
+            self.mode == "stop"
+            or not self._relative_stack_mode()
+            or reference["microscope_name"]
+            != self.parent_controller.configuration_controller.microscope_name
+        ):
+            return
+        state = self.microscope_state_dict
+        geometry = StackGeometry.from_legacy_state(state)
+        origin = StackReference(reference["z"], reference["focus"])
+        if not reference["multiposition"]:
+            self.stack_acq_vals["bottom"].set(state["abs_z_start"])
+            self.stack_acq_vals["top"].set(state["abs_z_end"])
+        self.view.stack_acq_frame.draw_relative_stack(
+            state["relative_stack_range"],
+            origin.z,
+            geometry.position(origin, geometry.z.count - 1)[0],
+            multiposition=reference["multiposition"],
+            frozen=True,
+        )
 
     def update_z_steps(self, *_: tuple[str]) -> None:
         """Recalculates the number of slices that will be acquired in a z-stack.
@@ -569,6 +788,10 @@ class ChannelsTabController(GUIController):
 
         # won't do any calculation when initialization
         if self.in_initialization:
+            return
+
+        if self._relative_stack_mode():
+            self._update_relative_stack()
             return
 
         # Calculate the number of slices and set GUI
@@ -684,6 +907,8 @@ class ChannelsTabController(GUIController):
         endpoint : str
             Capture button, either ``"start"`` or ``"end"``.
         """
+        if self._relative_stack_mode():
+            return
         z_device = self.stack_acq_vals["z_device"].get()
         f_device = self.stack_acq_vals["f_device"].get()
         z_axis = z_device.split(" - ")[1]
@@ -937,6 +1162,7 @@ class ChannelsTabController(GUIController):
         self.microscope_state_dict["is_multiposition"] = self.is_multiposition
         self.update_timepoint_setting()
         self.show_verbose_info("Multi-position:", self.is_multiposition)
+        self.refresh_stack_reference_preview()
 
     def disable_multiposition_btn(self) -> None:
         """Disable multi-position button"""
@@ -1058,6 +1284,15 @@ class ChannelsTabController(GUIController):
         warning = self.channel_setting_controller.verify_experiment_values()
         if warning:
             return warning
+        if self._relative_stack_mode():
+            if self.microscope_state_dict["image_mode"] not in (
+                "z-stack",
+                "live",
+                "single",
+            ):
+                return "Relative mode is available for Z-stack acquisition. Select Absolute for a custom acquisition."
+            if getattr(self, "_relative_stack_error", ""):
+                return self._relative_stack_error
         if self.microscope_state_dict["image_mode"] not in ["live", "single"]:
             if (
                 self.microscope_state_dict["number_z_steps"]
@@ -1081,7 +1316,9 @@ class ChannelsTabController(GUIController):
     def _verify_stack_position_limits(self) -> str:
         """Return warning text if stack positions exceed relative stage limits."""
 
-        if not self._stage_limits_enabled():
+        # Relative coordinates are validated against a fresh model read and all
+        # position-table references before any camera is prepared.
+        if self._relative_stack_mode() or not self._stage_limits_enabled():
             return ""
 
         stack_positions = [
@@ -1194,6 +1431,7 @@ class ChannelsTabController(GUIController):
                 variable_dict[f"stack_{f_axis}"].set(False)
                 self.view.stack_acq_frame.update_setting_widgets(f_axis)()
         self.update_stack_position_limits()
+        self.refresh_stack_reference_preview()
 
     @property
     def custom_events(self) -> dict[str, callable]:
@@ -1203,6 +1441,7 @@ class ChannelsTabController(GUIController):
             "channel_defocus": self.set_channel_defocus,
             "defocus_reference": self.set_defocus_reference,
             "laser_power": self.set_laser_power_metadata,
+            "stack_reference": self.set_stack_reference,
         }
 
     def set_laser_power_metadata(self, record: dict) -> None:

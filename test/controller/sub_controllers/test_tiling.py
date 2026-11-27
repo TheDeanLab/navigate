@@ -337,6 +337,7 @@ def test_close_window_saves_state_and_removes_controller_attr():
     parent = SimpleNamespace(tiling_wizard_controller=object())
     controller = TilingWizardController.__new__(TilingWizardController)
     controller.variables = {"a": Var(1), "b": Var(2)}
+    controller._source_traces = []
     controller.view = SimpleNamespace(popup=SimpleNamespace(dismiss=MagicMock()))
     controller.parent_controller = parent
 

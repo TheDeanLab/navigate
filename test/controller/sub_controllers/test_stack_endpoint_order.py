@@ -306,6 +306,7 @@ def test_tiling_retains_stack_offsets_and_tile_coverage(
     wizard._axes = ["x", "y", "z", "f"]
     wizard._percent_overlap = 10
     wizard.is_validated = dict.fromkeys(wizard._axes, True)
+    wizard.stack_acq_frame = controller.view.stack_acq_frame
     wizard.stack_acq_widgets = controller.stack_acq_widgets
     wizard.stage_position_vars = {"theta": SimpleNamespace(get=lambda: 0)}
     wizard.multipoint_table = object()

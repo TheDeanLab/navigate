@@ -17,6 +17,7 @@ from navigate.model.data_sources.bdv_data_source import BigDataViewerDataSource
 from navigate.model.features.common_features import ZStackAcquisition
 from navigate.model.microscope import Microscope
 from navigate.tools.common_functions import copy_proxy_object
+from navigate.tools.stack_geometry import StackGeometry, StackReference
 from navigate.view.main_window_content.channels_tab import ChannelsTab
 
 
@@ -379,13 +380,17 @@ def test_microscope_switch_keeps_offsets_and_resets_capture_context(
     assert parent.commands == []
 
 
+@pytest.mark.parametrize("flipped", [False, True])
 @pytest.mark.parametrize("ext", ["h5", "n5"])
 @pytest.mark.parametrize("buttons", [("start", "end"), ("end", "start")])
 @pytest.mark.parametrize("positions,timepoints", [(2, 1), (1, 2)])
 def test_bdv_saved_geometry_matches_legacy_stack(
-    controller, tmp_path, ext, buttons, positions, timepoints
+    controller, tmp_path, ext, buttons, positions, timepoints, flipped
 ):
     """Save actual BDV volumes using the captured state and check pixels and XML."""
+    controller.parent_controller.configuration_controller.microscope_config["stage"][
+        "flip_z"
+    ] = flipped
     for button in buttons:
         capture(controller, button, *{"start": (100, 10), "end": (300, 30)}[button])
     configuration = controller.parent_controller.configuration
@@ -417,6 +422,8 @@ def test_bdv_saved_geometry_matches_legacy_stack(
     feature = ZStackAcquisition(SimpleNamespace())
     feature.get_z_stack_parameters(state)
     feature.get_f_stack_parameters(state)
+    feature.primary_z_axis, feature.primary_f_axis = "z", "f"
+    geometry = StackGeometry.from_legacy_state(state)
     source = BigDataViewerDataSource(str(tmp_path / f"stack.{ext}"))
     source.set_metadata_from_configuration_experiment(configuration)
     try:
@@ -425,17 +432,22 @@ def test_bdv_saved_geometry_matches_legacy_stack(
                 for c in range(2):
                     for z in range(feature.number_z_steps):
                         value = 100 * t + 20 * p + 5 * c + z
+                        feature.current_position = {"z": row[2], "f": row[4]}
+                        feature.z_position_moved_time = z
+                        target = (
+                            feature._z_target(z),
+                            feature._focus_target_for_channel(c),
+                        )
+                        assert target == geometry.position(
+                            StackReference(row[2], row[4]), z
+                        )
                         source.write(
                             np.full((4, 4), value, dtype=np.uint16),
                             x=row[0],
                             y=row[1],
-                            z=row[2]
-                            + feature.start_z_position
-                            + z * feature.z_step_size,
+                            z=target[0],
                             theta=0,
-                            f=row[4]
-                            + feature.start_focus
-                            + z * feature.focus_step_size,
+                            f=target[1],
                         )
         for t in range(timepoints):
             for p in range(positions):
@@ -465,4 +477,42 @@ def test_bdv_saved_geometry_matches_legacy_stack(
             registration.findtext("ViewTransform/affine"), sep=" "
         ).reshape(3, 4)
         np.testing.assert_allclose(affine[:, :3], np.eye(3))
-        np.testing.assert_allclose(affine[:, 3], [0, 100 * p, (175 + 180 * p) / 50])
+        centroid = 225 if flipped else 175
+        np.testing.assert_allclose(
+            affine[:, 3], [0, 100 * p, (centroid + 180 * p) / 50]
+        )
+
+
+@pytest.mark.parametrize("flipped", [False, True])
+def test_shared_gui_geometry_retains_legacy_fields_and_excluded_end(
+    controller, flipped
+):
+    controller.parent_controller.configuration_controller.microscope_config["stage"][
+        "flip_z"
+    ] = flipped
+    keys = set(controller.microscope_state_dict.keys())
+    controller.in_initialization = True
+    controller.z_origin, controller.focus_origin = 100, 50
+    for name, value in {
+        "start_position": 1 if flipped else 0,
+        "end_position": 0 if flipped else 1,
+        "step_size": 0.3,
+        "start_focus": 10,
+        "end_focus": 6,
+    }.items():
+        controller.stack_acq_vals[name].set(value)
+    controller.in_initialization = False
+    controller.update_z_steps()
+    state = controller.microscope_state_dict
+    assert set(state.keys()) == keys
+    assert state["number_z_steps"] == 4
+    assert state["step_size"] == (-0.3 if flipped else 0.3)
+    assert (state["abs_z_start"], state["abs_z_end"]) == (100, 101)
+    geometry = StackGeometry.from_legacy_state(state)
+    assert geometry.first_plane(StackReference(100, 50)) == (
+        101 if flipped else 100,
+        60,
+    )
+    assert geometry.last_plane(StackReference(100, 50)) == pytest.approx(
+        (100.1 if flipped else 100.9, 57)
+    )

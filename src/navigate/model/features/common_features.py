@@ -46,6 +46,12 @@ from navigate.config.configuration_schema import CollectionSpec, SettingSpec
 from navigate.model.features.base import FeatureBase
 from navigate.tools.common_functions import VariableWithLock
 from navigate.model.waveforms import remote_focus_ramp
+from navigate.tools.stack_geometry import (
+    StackAxis,
+    StackReference,
+    focus_position,
+    stack_position,
+)
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -1421,12 +1427,11 @@ class ZStackAcquisition(FeatureBase):
         microscope_state : dict
             The microscope state configuration dictionary.
         """
-        self.number_z_steps = int(microscope_state["number_z_steps"])
-        self.start_z_position = float(microscope_state["start_position"])
-        self.z_step_size = float(microscope_state["step_size"])
-        self.z_stack_distance = abs(
-            self.start_z_position - float(microscope_state["end_position"])
-        )
+        geometry = StackAxis.from_legacy_z(microscope_state)
+        self.number_z_steps = geometry.count
+        self.start_z_position = geometry.start
+        self.z_step_size = geometry.step
+        self.z_stack_distance = geometry.distance
 
     def get_f_stack_parameters(self, microscope_state: dict) -> None:
         """Get focus stack parameters from the configuration.
@@ -1436,20 +1441,34 @@ class ZStackAcquisition(FeatureBase):
         microscope_state : dict
             The microscope state configuration dictionary.
         """
-        self.start_focus = float(microscope_state["start_focus"])
-        end_focus = float(microscope_state["end_focus"])
-        self.focus_step_size = (end_focus - self.start_focus) / self.number_z_steps
-        self.f_stack_distance = abs(end_focus - self.start_focus)
+        geometry = StackAxis.focus_ramp(
+            float(microscope_state["start_focus"]),
+            float(microscope_state["end_focus"]),
+            self.number_z_steps,
+        )
+        self.start_focus = geometry.start
+        self.focus_step_size = geometry.step
+        self.f_stack_distance = geometry.distance
+
+    def _z_target(self, index: int = 0) -> float:
+        """Resolve the current Z target while honoring legacy feature attributes."""
+        return stack_position(
+            self.start_z_position,
+            self.current_position[self.primary_z_axis],
+            self.z_step_size,
+            index,
+        )
 
     def _focus_target_for_channel(self, channel_index: int) -> float:
         """Return the absolute focus target for a channel at the current stack step."""
         defocus = self.defocus[channel_index] if self.defocus is not None else 0.0
-        zero_defocus_start_focus = self.start_focus - self.first_channel_defocus
-        return (
-            zero_defocus_start_focus
-            + self.current_position[self.primary_f_axis]
-            + self.z_position_moved_time * self.focus_step_size
-            + defocus
+        return focus_position(
+            self.start_focus,
+            self.current_position[self.primary_f_axis],
+            self.focus_step_size,
+            self.z_position_moved_time,
+            self.first_channel_defocus,
+            defocus,
         )
 
     def pre_signal_func(self) -> None:
@@ -1484,18 +1503,16 @@ class ZStackAcquisition(FeatureBase):
                 [float(pos_dict[f"{axis}_pos"]) for axis in self.stage_axes]
             ]
 
-            # get origin for primary z and f
-            if not self.get_origin:
-                self.positions[0][self.stage_axes.index(self.primary_z_axis)] = (
-                    microscope_state.get(
-                        "stack_z_origin", pos_dict[f"{self.primary_z_axis}_pos"]
-                    )
-                )
-                self.positions[0][self.stage_axes.index(self.primary_f_axis)] = (
-                    microscope_state.get(
-                        "stack_focus_origin", pos_dict[f"{self.primary_f_axis}_pos"]
-                    )
-                )
+            reference = StackReference.for_single_position(
+                microscope_state,
+                float(pos_dict[f"{self.primary_z_axis}_pos"]),
+                float(pos_dict[f"{self.primary_f_axis}_pos"]),
+                use_current=self.get_origin,
+            )
+            self.positions[0][self.stage_axes.index(self.primary_z_axis)] = reference.z
+            self.positions[0][
+                self.stage_axes.index(self.primary_f_axis)
+            ] = reference.focus
 
         self.axes_index = [
             self.position_headers.index(axis.upper()) for axis in self.stage_axes
@@ -1571,9 +1588,7 @@ class ZStackAcquisition(FeatureBase):
             )
 
             # calculate first z, f position
-            self.current_z_position = (
-                self.start_z_position + self.current_position[self.primary_z_axis]
-            )
+            self.current_z_position = self._z_target()
             self.current_focus_position = self._focus_target_for_channel(
                 self.current_channel_in_list
             )
@@ -1700,11 +1715,7 @@ class ZStackAcquisition(FeatureBase):
             # next z, f position
             # update z position moved time
             self.z_position_moved_time += 1
-            self.current_z_position = (
-                self.start_z_position
-                + self.current_position[self.primary_z_axis]
-                + self.z_position_moved_time * self.z_step_size
-            )
+            self.current_z_position = self._z_target(self.z_position_moved_time)
             self.current_focus_position = self._focus_target_for_channel(
                 self.current_channel_in_list
             )
@@ -1713,9 +1724,7 @@ class ZStackAcquisition(FeatureBase):
         if self.z_position_moved_time >= self.number_z_steps:
             self.z_position_moved_time = 0
             # calculate first z, f position
-            self.current_z_position = (
-                self.start_z_position + self.current_position[self.primary_z_axis]
-            )
+            self.current_z_position = self._z_target()
             self.current_focus_position = self._focus_target_for_channel(
                 self.current_channel_in_list
             )
@@ -1917,9 +1926,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
             pos_dict = {}
 
         # calculate first z, f position
-        self.current_z_position = (
-            self.start_z_position + self.current_position[self.primary_z_axis]
-        )
+        self.current_z_position = self._z_target()
         self.current_focus_position = self._focus_target_for_channel(
             self.current_channel_in_list
         )
@@ -1967,9 +1974,7 @@ class ASIZStackAcquisition(ZStackAcquisition):
             self.model.pause_data_thread()
             logger.info("Data thread paused.")
 
-        pos_dict[f"{self.primary_z_axis}_abs"] = (
-            self.current_position[self.primary_z_axis] + self.start_z_position
-        )
+        pos_dict[f"{self.primary_z_axis}_abs"] = self.current_z_position
         pos_dict[f"{self.primary_f_axis}_abs"] = self.current_focus_position
 
         logger.info(

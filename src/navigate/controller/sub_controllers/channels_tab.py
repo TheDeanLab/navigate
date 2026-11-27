@@ -36,7 +36,6 @@ import datetime
 from typing import Optional, Dict, Any
 
 # Third Party Imports
-import numpy as np
 import tkinter as tk
 from tkinter import messagebox
 
@@ -48,6 +47,7 @@ from navigate.controller.sub_controllers.channels_settings import (
     ChannelSettingController,
 )
 from navigate.controller.sub_controllers.tiling import TilingWizardController
+from navigate.tools.stack_geometry import StackAxis
 from navigate.view.main_window_content.channels_tab import ChannelsTab
 from navigate.view.popups.tiling_wizard_popup import TilingWizardPopup
 
@@ -598,35 +598,32 @@ class ChannelsTabController(GUIController):
             logger.error("Error caught: updating z_steps")
             return
 
-        number_z_steps = int(
-            np.ceil(np.abs((end_position - start_position) / step_size))
-        )
-        self.stack_acq_vals["number_z_steps"].set(number_z_steps)
-
         # get the primary z-stack and focus axis
         primary_z_stage = self.stack_acq_vals["z_device"].get()
         primary_z_axis = primary_z_stage.split(" - ")[1]
 
         # Shift the start/stop positions by the relative position
         flip_flags = self.parent_controller.configuration_controller.stage_flip_flags
+        geometry = StackAxis.from_bounds(
+            start_position, end_position, step_size, flipped=flip_flags[primary_z_axis]
+        )
+        self.stack_acq_vals["number_z_steps"].set(geometry.count)
         if flip_flags[primary_z_axis]:
-            self.microscope_state_dict["abs_z_start"] = self.z_origin + end_position
-            self.microscope_state_dict["abs_z_end"] = self.z_origin + start_position
+            self.microscope_state_dict["abs_z_start"] = self.z_origin + geometry.end
+            self.microscope_state_dict["abs_z_end"] = self.z_origin + geometry.start
             # self.stack_acq_vals["abs_z_start"].set(self.z_origin + end_position)
             # self.stack_acq_vals["abs_z_end"].set(self.z_origin + start_position)
         else:
-            self.microscope_state_dict["abs_z_start"] = self.z_origin + start_position
-            self.microscope_state_dict["abs_z_end"] = self.z_origin + end_position
+            self.microscope_state_dict["abs_z_start"] = self.z_origin + geometry.start
+            self.microscope_state_dict["abs_z_end"] = self.z_origin + geometry.end
             # self.stack_acq_vals["abs_z_start"].set(self.z_origin + start_position)
             # self.stack_acq_vals["abs_z_end"].set(self.z_origin + end_position)
 
         # update experiment MicroscopeState dict
-        self.microscope_state_dict["start_position"] = start_position
-        self.microscope_state_dict["end_position"] = end_position
-        self.microscope_state_dict["step_size"] = step_size * (
-            -1 if flip_flags[primary_z_axis] else 1
-        )
-        self.microscope_state_dict["number_z_steps"] = number_z_steps
+        self.microscope_state_dict["start_position"] = geometry.start
+        self.microscope_state_dict["end_position"] = geometry.end
+        self.microscope_state_dict["step_size"] = geometry.step
+        self.microscope_state_dict["number_z_steps"] = geometry.count
         self.stack_acq_vals["bottom"].set(self.microscope_state_dict["abs_z_start"])
         self.stack_acq_vals["top"].set(self.microscope_state_dict["abs_z_end"])
 

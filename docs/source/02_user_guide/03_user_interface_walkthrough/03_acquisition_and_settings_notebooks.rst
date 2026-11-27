@@ -108,8 +108,18 @@ also retained when saving and reloading an experiment. A new acquisition after
 changing microscopes obtains a new reference in the selected microscope's
 coordinates. Run autofocus before Acquire to use its updated focus position.
 Relative mode is available for standard Z-stack acquisition; select Absolute
-for custom acquisition workflows. Acquisition-progress animation is not included
-in this release.
+for custom acquisition workflows.
+
+During a standard Z-stack acquisition, both position modes show a moving plane
+in the schematic, along with the slice, channel, position, timepoint, and number
+of received frames. The marker follows the latest received camera plane at its
+planned coordinates. It is not a measured stage-position indicator: the
+animation does not request additional stage readbacks. Updates occur up to
+10 times per second and when a timepoint completes, so fast stacks may skip
+intermediate planes on screen. The marker
+holds its position while waiting for camera frames or between timepoints, and
+the idle schematic returns when acquisition finishes or is stopped. Custom
+acquisition workflows retain their existing display behavior.
 
 1. In Absolute mode, :guilabel:`Start` / :guilabel:`End` show offsets from the fixed stack reference; the schematic shows the corresponding physical bounds.
 2. :guilabel:`Set Start Pos/Foc` and :guilabel:`Set End Pos/Foc` read current stage values.

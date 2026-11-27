@@ -46,9 +46,9 @@ def test_relative_preview_follows_position_until_acquisition_then_freezes(contro
         }
     )
     text = [
-        frame.relative_schematic.itemcget(i, "text")
-        for i in frame.relative_schematic.find_all()
-        if frame.relative_schematic.type(i) == "text"
+        frame.idle_schematic.itemcget(i, "text")
+        for i in frame.idle_schematic.find_all()
+        if frame.idle_schematic.type(i) == "text"
     ]
     assert "Frozen at Acquire" in text
     controller.mode = "stop"
@@ -77,6 +77,14 @@ def test_toggle_preserves_fixed_endpoints_and_ramp_settings_without_moving(contr
     assert controller.microscope_state_dict["start_focus"] == -5
     frame.relative_focus_ramp.set(False)
     assert controller.microscope_state_dict["start_focus"] == 0
+    # Disabled inputs remain visible and retain the saved ramp, but cannot edit
+    # the effective constant-focus stack while the ramp is off.
+    for endpoint, saved in (("start", -5), ("end", 5)):
+        widget = frame.inputs[f"{endpoint}_focus"].widget
+        widget.delete(0, "end")
+        widget.insert(0, "999")
+        assert controller.stack_acq_vals[f"{endpoint}_focus"].get() == saved
+        assert controller.microscope_state_dict[f"{endpoint}_focus"] == 0
     frame.position_mode.set("Absolute")
     assert physical_pairs(controller) == expected
     frame.position_mode.set("Relative")
@@ -138,20 +146,28 @@ def test_switching_scope_reanchors_restored_absolute_offsets(controller):
 def test_relative_controls_and_schematic_switch_with_mode(controller):
     frame = relative(controller)
     assert frame.relative_controls.winfo_manager() == "grid"
-    assert frame.relative_schematic.winfo_manager() == "grid"
-    assert frame.cubic_image_label.winfo_manager() == ""
-    assert frame.inputs["start_focus"].winfo_manager() == ""
-    assert frame.buttons["set_start"].winfo_manager() == ""
+    assert frame.idle_schematic.winfo_manager() == "grid"
+    assert frame.inputs["start_focus"].winfo_manager() == "grid"
+    assert str(frame.inputs["start_focus"].widget.cget("state")) == "disabled"
+    assert frame.buttons["set_start"].winfo_manager() == "grid"
+    assert frame.buttons["set_start"].instate(["disabled"])
+    assert not frame.relative_focus_ramp_widget.instate(["disabled"])
     assert frame.mode_frame.grid_info()["row"] < frame.stack_frame.grid_info()["row"]
     frame.relative_focus_ramp.set(True)
     assert frame.inputs["start_focus"].winfo_manager() == "grid"
+    assert str(frame.inputs["start_focus"].widget.cget("state")) == "normal"
     controller.mode = "z-stack"
     controller._configure_stack_position_mode()
     assert str(frame.position_mode_widget.cget("state")) == "disabled"
     assert str(frame.relative_range_widget.widget.cget("state")) == "disabled"
+    assert str(frame.inputs["start_focus"].widget.cget("state")) == "disabled"
+    assert frame.relative_focus_ramp_widget.instate(["disabled"])
     controller.mode = "stop"
     frame.position_mode.set("Absolute")
-    assert frame.cubic_image_label.winfo_manager() == "grid"
-    assert frame.relative_schematic.winfo_manager() == ""
-    assert frame.relative_controls.winfo_manager() == ""
+    assert frame.idle_schematic.winfo_manager() == "grid"
+    assert frame.relative_controls.winfo_manager() == "grid"
+    assert str(frame.relative_range_widget.widget.cget("state")) == "disabled"
+    assert frame.relative_focus_ramp_widget.instate(["disabled"])
+    assert str(frame.inputs["start_focus"].widget.cget("state")) == "normal"
     assert frame.buttons["set_start"].winfo_manager() == "grid"
+    assert not frame.buttons["set_start"].instate(["disabled"])

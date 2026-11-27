@@ -35,11 +35,11 @@ import tkinter as tk
 from tkinter import ttk
 import logging
 from typing import Dict
-from pathlib import Path
 
 # Third Party Imports
 
 # Local Imports
+from navigate.tools.stack_progress import StackProgressSnapshot
 from navigate.view.custom_widgets.hover import HoverButton, Hover
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
@@ -51,7 +51,6 @@ from navigate.view.custom_widgets.common import (
 from navigate.view.theme import (
     get_theme_color,
     get_theme_padding_px,
-    get_theme_preset,
     get_theme_spacing,
     get_theme_space_px,
 )
@@ -155,7 +154,9 @@ class ChannelsTab(tk.Frame):
         configure_grid(
             self,
             columns={0: 1, 1: 1, 2: 1},
-            rows={0: 3, 1: 2, 2: 1, 3: 1},
+            # The stack panel keeps its compact height when the main window
+            # grows; surplus space belongs to the other sections.
+            rows={0: 3, 1: 0, 2: 1, 3: 1},
         )
 
 
@@ -607,7 +608,6 @@ class StackAcquisitionFrame(ttk.Labelframe):
             variable=self.relative_focus_ramp,
         )
         self.relative_focus_ramp_widget.grid(row=0, column=1, padx=6)
-        self.relative_controls.grid_remove()
 
         self.stack_frame = ttk.Frame(self)
         self.additional_stack_frame = ttk.Frame(self)
@@ -620,8 +620,9 @@ class StackAcquisitionFrame(ttk.Labelframe):
         )
         themed_grid(self.additional_stack_frame, row=2, column=0, sticky=tk.NSEW)
 
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
+        # Keep controls together when the Channels tab receives extra height.
+        # Only the empty row below the settings should absorb that space.
+        self.rowconfigure(3, weight=1)
         self.columnconfigure(0, weight=1)
 
         # Start Pos Frame (Vertically oriented)
@@ -629,7 +630,9 @@ class StackAcquisitionFrame(ttk.Labelframe):
         start_labels = ["Pos", "Foc"]
 
         #: ttk.Label: The label for the start position frame
-        start_label = self.start_label = ttk.Label(self.stack_frame, text="Start")
+        start_label = self.start_label = ttk.Label(
+            self.stack_frame, text="Start", width=12, anchor=tk.CENTER
+        )
         start_label.grid(row=0, column=0, sticky="S")
         for i in range(len(start_names)):
             self.inputs[start_names[i]] = LabelInput(
@@ -665,7 +668,9 @@ class StackAcquisitionFrame(ttk.Labelframe):
         end_labels = ["Pos", "Foc"]
 
         #: ttk.Label: The label for the end position
-        end_label = self.end_label = ttk.Label(self.stack_frame, text="End")
+        end_label = self.end_label = ttk.Label(
+            self.stack_frame, text="End", width=12, anchor=tk.CENTER
+        )
         end_label.grid(row=0, column=1, sticky="S")
         for i in range(len(end_names)):
             self.inputs[end_names[i]] = LabelInput(
@@ -730,79 +735,83 @@ class StackAcquisitionFrame(ttk.Labelframe):
             padx=get_theme_padding_px((6, 0)),
         )
 
-        # devices
+        # Group device settings independently of the taller schematic so its
+        # requested height cannot introduce gaps between the individual rows.
+        self.device_frame: ttk.Frame = ttk.Frame(self.stack_frame)
+        self.device_frame.grid(row=4, column=0, columnspan=2, sticky=tk.N + tk.EW)
+        self.device_frame.columnconfigure(0, weight=1)
         self.inputs["z_device"] = LabelInput(
-            parent=self.stack_frame,
-            label="Z-Stack Device".ljust(30),
+            parent=self.device_frame,
+            label="Z-Stack Device",
+            label_args={"width": 22},
             input_class=ValidatedCombobox,
             input_var=tk.StringVar(),
             input_args={"width": 8},
         )
         self.inputs["z_device"].state(["disabled", "readonly"])
         self.inputs["z_device"].grid(
-            row=4,
+            row=0,
             column=0,
-            columnspan=2,
-            sticky="NSEW",
+            sticky=tk.EW,
             padx=get_theme_space_px(6),
             pady=get_theme_space_px(5),
         )
 
         self.inputs["f_device"] = LabelInput(
-            parent=self.stack_frame,
-            label="Focus Device".ljust(30),
+            parent=self.device_frame,
+            label="Focus Device",
+            label_args={"width": 22},
             input_class=ValidatedCombobox,
             input_var=tk.StringVar(),
             input_args={"width": 8},
         )
         self.inputs["f_device"].state(["disabled", "readonly"])
         self.inputs["f_device"].grid(
-            row=5,
+            row=1,
             column=0,
-            columnspan=2,
-            sticky="NSEW",
+            sticky=tk.EW,
             padx=get_theme_space_px(6),
             pady=get_theme_space_px(5),
         )
 
         # Laser Cycling Settings
         self.inputs["cycling"] = LabelInput(
-            parent=self.stack_frame,
-            label="Laser Cycling Settings".ljust(25),
+            parent=self.device_frame,
+            label="Laser Cycling Settings",
+            label_args={"width": 22},
             input_class=ValidatedCombobox,
             input_var=tk.StringVar(),
             input_args={"width": 8},
         )
         self.inputs["cycling"].state(["readonly"])
         self.inputs["cycling"].grid(
-            row=6,
+            row=2,
             column=0,
-            columnspan=2,
-            sticky="NSEW",
+            sticky=tk.EW,
             padx=get_theme_space_px(6),
             pady=get_theme_space_px(5),
         )
 
         self.inputs["speed"] = LabelInput(
-            parent=self.stack_frame,
-            label="Speed Mode".ljust(30),
+            parent=self.device_frame,
+            label="Speed Mode",
+            label_args={"width": 22},
             input_class=ttk.Combobox,
             input_var=tk.StringVar(),
             input_args={"width": 8, "values": ["Auto", "Fixed"]},
         )
         self.inputs["speed"].state(["disabled", "readonly"])
         self.inputs["speed"].grid(
-            row=7,
+            row=3,
             column=0,
-            columnspan=2,
-            sticky="NSEW",
-            padx=get_theme_space_px(5),
+            sticky=tk.EW,
+            padx=get_theme_space_px(6),
             pady=get_theme_space_px(5),
         )
 
-        self.cubic_frame = ttk.Frame(self.stack_frame)
-        self.cubic_frame.grid(
-            row=3,
+        self.schematic_frame = ttk.Frame(self.stack_frame)
+        self.schematic_frame.grid(
+            row=2,
             rowspan=3,
             column=2,
             columnspan=2,
@@ -810,64 +819,40 @@ class StackAcquisitionFrame(ttk.Labelframe):
             padx=get_theme_padding_px((5, 15)),
             pady=get_theme_padding_px((5, 0)),
         )
-
-        image_directory = Path(__file__).resolve().parent
-        cubic_image = "cubic_bottom_to_top.png"
-        if get_theme_preset() == "classic_night":
-            cubic_image = "cubic_bottom_to_top_dark-theme.png"
-        image_path = image_directory.joinpath("images", cubic_image)
-
-        self.image = None
-        try:
-            loaded_image = tk.PhotoImage(master=self.cubic_frame, file=str(image_path))
-            if str(loaded_image):
-                self.image = loaded_image
-            else:
-                logger.warning(
-                    "Stack acquisition image handle is empty for %s. "
-                    "Falling back to a text label.",
-                    image_path,
-                )
-        except tk.TclError:
-            logger.warning(
-                "Unable to load stack acquisition image at %s. "
-                "Falling back to a text label.",
-                image_path,
-                exc_info=True,
-            )
-
-        if self.image is not None:
-            try:
-                self.cubic_image_label = ttk.Label(self.cubic_frame, image=self.image)
-            except tk.TclError:
-                logger.warning(
-                    "Unable to attach stack acquisition image to label. "
-                    "Falling back to a text label.",
-                    exc_info=True,
-                )
-                self.image = None
-
-        if self.image is None:
-            self.cubic_image_label = ttk.Label(self.cubic_frame, text="")
-
-        self.cubic_image_label.grid(
-            row=0,
-            rowspan=2,
-            column=0,
-            columnspan=2,
-            sticky=tk.NSEW,
-            padx=get_theme_padding_px((5, 0)),
-            pady=get_theme_padding_px((5, 0)),
-        )
-
-        self.relative_schematic = tk.Canvas(
-            self.cubic_frame,
-            width=230,
-            height=175,
+        self.schematic_frame.rowconfigure(0, weight=1)
+        self.schematic_frame.columnconfigure(0, weight=1)
+        # Keep both views in the same grid cell so Tk reserves their maximum
+        # requested size, including the idle endpoint fields. Raising a view
+        # changes visibility without moving the acquisition controls below it.
+        self.cubic_frame = ttk.Frame(self.schematic_frame)
+        self.cubic_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        self.progress_frame = ttk.Frame(self.schematic_frame)
+        self.progress_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        self.progress_schematic = tk.Canvas(
+            self.progress_frame,
+            width=280,
+            height=215,
             highlightthickness=0,
             background=get_theme_color("panel_bg", "#1a212b"),
         )
-        self.relative_schematic_hover = Hover(self.relative_schematic)
+        self.progress_schematic.pack(fill=tk.BOTH, expand=True)
+        self.progress_schematic_hover = Hover(self.progress_schematic)
+        self.cubic_frame.tkraise()
+
+        # Absolute and relative previews use the same vector outline as the
+        # animation, at the same origin, rather than swapping a bitmap cartoon.
+        self.idle_schematic: tk.Canvas = tk.Canvas(
+            self.cubic_frame,
+            width=230,
+            height=215,
+            highlightthickness=0,
+            background=get_theme_color("panel_bg", "#1a212b"),
+        )
+        self.idle_schematic.grid(
+            row=0, rowspan=2, column=0, columnspan=2, sticky=tk.NSEW
+        )
+        self.idle_schematic_hover: Hover = Hover(self.idle_schematic)
+        self.draw_absolute_stack(0, 0)
 
         self.inputs["top"] = LabelInput(
             parent=self.cubic_frame,
@@ -918,8 +903,9 @@ class StackAcquisitionFrame(ttk.Labelframe):
             pady=get_theme_space_px(5),
         )
 
-        uniform_grid(self)
-        uniform_grid(self.stack_frame)
+        for column in range(4):
+            self.stack_frame.columnconfigure(column, weight=1)
+        self.configure_position_mode(relative=False, ramp=False, editable=True)
 
         # Initialize DescriptionHovers
         self.inputs["step_size"].widget.hover.setdescription("The Z-stack step size.")
@@ -967,26 +953,18 @@ class StackAcquisitionFrame(ttk.Labelframe):
     def configure_position_mode(
         self, relative: bool, ramp: bool, editable: bool
     ) -> None:
-        """Show the controls appropriate to fixed endpoints or a centered range."""
+        """Enable applicable controls without changing the panel's footprint."""
         self.position_mode_widget.configure(
             state="readonly" if editable else "disabled"
         )
         self.relative_range_widget.widget.configure(
-            state="normal" if editable else "disabled"
+            state="normal" if relative and editable else "disabled"
         )
         self.relative_focus_ramp_widget.configure(
-            state="normal" if editable else "disabled"
+            state="normal" if relative and editable else "disabled"
         )
         self.start_label.configure(text="Start offset" if relative else "Start")
         self.end_label.configure(text="End offset" if relative else "End")
-        if relative:
-            self.relative_controls.grid()
-            self.cubic_image_label.grid_remove()
-            self.relative_schematic.grid(row=0, rowspan=2, column=0, columnspan=2)
-        else:
-            self.relative_controls.grid_remove()
-            self.relative_schematic.grid_remove()
-            self.cubic_image_label.grid()
         for endpoint in ("start", "end"):
             self.inputs[f"{endpoint}_position"].widget.configure(
                 state=(
@@ -996,17 +974,49 @@ class StackAcquisitionFrame(ttk.Labelframe):
                 )
             )
             focus = self.inputs[f"{endpoint}_focus"]
-            focus.widget.configure(state="normal" if editable else "disabled")
-            if relative and not ramp:
-                focus.grid_remove()
-            else:
-                focus.grid()
+            focus.widget.configure(
+                state="normal" if editable and (not relative or ramp) else "disabled"
+            )
             button = self.buttons[f"set_{endpoint}"]
             button.configure(state="disabled" if relative else "normal")
-            if relative:
-                button.grid_remove()
-            else:
-                button.grid()
+
+    @staticmethod
+    def _draw_stack_outline(canvas: tk.Canvas) -> None:
+        """Draw the shared idle/acquisition outline at a stable canvas origin."""
+        color = get_theme_color("text", "#d7dee8")
+        canvas.create_rectangle(12, 28, 90, 125, outline=color, tags="stack_outline")
+        canvas.create_line(
+            [12, 28, 32, 12, 110, 12, 90, 28], fill=color, tags="stack_outline"
+        )
+        canvas.create_line(
+            [110, 12, 110, 109, 90, 125], fill=color, tags="stack_outline"
+        )
+
+    def draw_absolute_stack(self, start: float, end: float, axis: str = "z") -> None:
+        """Show fixed bounds using the same vector schematic as received planes.
+
+        Parameters
+        ----------
+        start, end : float
+            Absolute stack boundaries from the existing geometry calculation.
+        axis : str, optional
+            Stack axis, used to select angular or linear units for the labels.
+        """
+        canvas = self.idle_schematic
+        canvas.delete("all")
+        self._draw_stack_outline(canvas)
+        color = get_theme_color("text", "#d7dee8")
+        unit = "°" if axis == "theta" else "µm"
+        lower, upper = sorted((start, end))
+        for tag, y, value in (("idle_top", 28, upper), ("idle_bottom", 125, lower)):
+            canvas.create_text(
+                120, y, text=f"{value:g} {unit}", anchor="w", fill=color, tags=tag
+            )
+        canvas.create_text(115, 157, text="Fixed endpoints", fill=color)
+        self.idle_schematic_hover.setdescription(
+            "Absolute stack boundaries. During acquisition, the plane marker "
+            "shows the latest received image at its planned coordinates."
+        )
 
     def draw_relative_stack(
         self,
@@ -1018,13 +1028,11 @@ class StackAcquisitionFrame(ttk.Labelframe):
         frozen: bool = False,
     ) -> None:
         """Draw signed boundaries and the reference without querying hardware."""
-        canvas = self.relative_schematic
+        canvas = self.idle_schematic
         canvas.delete("all")
         color = get_theme_color("text", "#d7dee8")
         accent = get_theme_color("accent", "#4b78b8")
-        canvas.create_rectangle(12, 28, 90, 125, outline=color)
-        canvas.create_line([12, 28, 32, 12, 110, 12, 90, 28], fill=color)
-        canvas.create_line([110, 12, 110, 109, 90, 125], fill=color)
+        self._draw_stack_outline(canvas)
         canvas.create_line(12, 76, 110, 76, fill=accent, width=2)
         sample_y = 125 - (last - center + extent / 2) / extent * 97
         canvas.create_line(12, sample_y, 90, sample_y, fill=color, dash=(3, 3))
@@ -1040,10 +1048,81 @@ class StackAcquisitionFrame(ttk.Labelframe):
             text=status if not multiposition else "Offsets from each row",
             fill=color,
         )
-        self.relative_schematic_hover.setdescription(
+        self.idle_schematic_hover.setdescription(
             f"Dashed line: last sampled {'offset' if multiposition else 'Z'} "
             f"{last - center if multiposition else last:g} µm. "
             "The requested end boundary is not included in the sampled planes."
+        )
+
+    def clear_stack_progress(self) -> None:
+        """Restore the idle schematic without changing acquisition inputs."""
+        self.progress_schematic.delete("all")
+        self.cubic_frame.tkraise()
+
+    def draw_stack_progress(self, snapshot: StackProgressSnapshot) -> None:
+        """Move the plane marker using planned coordinates of received frames.
+
+        Canvas items are reused between updates. This method runs only on the Tk
+        thread and does not read stage coordinates or change stack settings.
+        """
+        canvas = self.progress_schematic
+        self.progress_frame.tkraise()
+        color = get_theme_color("text", "#d7dee8")
+        accent = get_theme_color("accent", "#4b78b8")
+        if not canvas.find_withtag("acquisition_plane"):
+            canvas.delete("all")
+            self._draw_stack_outline(canvas)
+            canvas.create_polygon(
+                [12, 125, 32, 109, 110, 109, 90, 125],
+                fill=accent,
+                outline=color,
+                stipple="gray50",
+                tags="acquisition_plane",
+            )
+            for tag, x, y in (
+                ("progress_top", 120, 28),
+                ("progress_bottom", 120, 125),
+                ("progress_coordinate", 120, 75),
+                ("progress_slice", 12, 149),
+                ("progress_position", 12, 168),
+                ("progress_received", 12, 187),
+            ):
+                canvas.create_text(x, y, anchor="w", fill=color, tags=tag)
+        lower, upper = sorted((snapshot.start, snapshot.end))
+        fraction = (snapshot.z - lower) / (upper - lower) if upper > lower else 0.5
+        y = 125 - max(0, min(1, fraction)) * 97
+        canvas.coords("acquisition_plane", 12, y, 32, y - 16, 110, y - 16, 90, y)
+        reference = snapshot.reference_z if snapshot.relative else 0
+        unit = "°" if snapshot.z_axis == "theta" else "µm"
+        focus_unit = "°" if snapshot.f_axis == "theta" else "µm"
+        sign = "+" if snapshot.relative else ""
+        canvas.itemconfigure("progress_top", text=f"{upper - reference:{sign}g} {unit}")
+        canvas.itemconfigure(
+            "progress_bottom", text=f"{lower - reference:{sign}g} {unit}"
+        )
+        canvas.itemconfigure(
+            "progress_coordinate",
+            text=f"Target {snapshot.z_axis.upper()}: {snapshot.z:g} {unit}\n"
+            f"{snapshot.f_axis.upper()}: {snapshot.focus:g} {focus_unit}",
+        )
+        channel_label = snapshot.channel.replace("channel_", "Ch ", 1)
+        canvas.itemconfigure(
+            "progress_slice",
+            text=f"Slice {snapshot.plane}/{snapshot.planes} · {channel_label}",
+        )
+        canvas.itemconfigure(
+            "progress_position",
+            text=f"Position {snapshot.position}/{snapshot.positions} · "
+            f"Time {snapshot.timepoint}/{snapshot.timepoints}",
+        )
+        canvas.itemconfigure(
+            "progress_received",
+            text=f"Received {snapshot.completed}/{snapshot.total} frames",
+        )
+        self.progress_schematic_hover.setdescription(
+            "Latest received camera plane at its planned coordinates. "
+            "This is acquisition progress, not a measured stage readback. "
+            "No additional stage polling is performed."
         )
 
     def create_additional_stack_widgets(self, axes: list, devices: dict) -> None:

@@ -34,6 +34,7 @@
 # Standard Library Imports
 import logging
 from tkinter import messagebox
+import tkinter as tk
 import os
 
 # Third Party Imports
@@ -48,7 +49,6 @@ from navigate.tools.multipos_table_tools import (
 from navigate.controller.sub_controllers.gui import GUIController
 from navigate.tools.file_functions import save_yaml_file, load_yaml_file
 from navigate.config.config import get_navigate_path
-
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -138,9 +138,9 @@ class TilingWizardController(GUIController):
         self.cam_settings_widgets = (
             main_view.settings.camera_settings_tab.camera_roi.get_widgets()
         )
-        self.stack_acq_widgets = (
-            main_view.settings.channels_tab.stack_acq_frame.get_widgets()
-        )
+        #: StackAcquisitionFrame: Live mode and ramp controls for this wizard.
+        self.stack_acq_frame = main_view.settings.channels_tab.stack_acq_frame
+        self.stack_acq_widgets = self.stack_acq_frame.get_widgets()
         self.stage_position_vars = (
             main_view.settings.stage_control_tab.position_frame.get_variables()
         )
@@ -153,35 +153,29 @@ class TilingWizardController(GUIController):
             "write", lambda *args: self.update_overlap()
         )
 
-        # Trace cam_settings FOV to catch user changes
-        # FOV change handled in update_fov
-        self.cam_settings_widgets["FOV_X"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov("y")
-        )
-        self.cam_settings_widgets["FOV_Y"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov("x")
-        )
         # primary z/f
         self.primary_z_axis = self.stack_acq_widgets["z_device"].get().split(" - ")[1]
         self.primary_f_axis = self.stack_acq_widgets["f_device"].get().split(" - ")[1]
-        self.stack_acq_widgets["z_device"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov("z_device")
-        )
-        self.stack_acq_widgets["f_device"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov("f_device")
-        )
-        self.stack_acq_widgets["start_position"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov("z")
-        )
-        self.stack_acq_widgets["end_position"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov("z")
-        )
-        self.stack_acq_widgets["start_focus"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov("f")
-        )
-        self.stack_acq_widgets["end_focus"].get_variable().trace_add(
-            "write", lambda *args: self.update_fov("f")
-        )
+        #: list: Subscriptions to controls that outlive the tiling popup.
+        self._source_traces: list[tuple[tk.Variable, str]] = []
+        # Mode/ramp toggles can change effective focus without writing either
+        # endpoint field. Keep the FOV and tile counts current for an open popup.
+        for variable, axis in (
+            (self.cam_settings_widgets["FOV_X"].get_variable(), "y"),
+            (self.cam_settings_widgets["FOV_Y"].get_variable(), "x"),
+            (self.stack_acq_widgets["z_device"].get_variable(), "z_device"),
+            (self.stack_acq_widgets["f_device"].get_variable(), "f_device"),
+            (self.stack_acq_widgets["start_position"].get_variable(), "z"),
+            (self.stack_acq_widgets["end_position"].get_variable(), "z"),
+            (self.stack_acq_widgets["start_focus"].get_variable(), "f"),
+            (self.stack_acq_widgets["end_focus"].get_variable(), "f"),
+            (self.stack_acq_frame.position_mode, "f"),
+            (self.stack_acq_frame.relative_focus_ramp, "f"),
+        ):
+            token = variable.trace_add(
+                "write", lambda *args, axis=axis: self.update_fov(axis)
+            )
+            self._source_traces.append((variable, token))
 
         # Calculate distances
         for axis in self._axes:
@@ -274,9 +268,39 @@ class TilingWizardController(GUIController):
             filename="tiling_wizard_settings.yaml",
         )
 
+        # Main-window variables survive the popup. Remove their callbacks so a
+        # reopened wizard is the only one responding to subsequent changes.
+        for variable, token in self._source_traces:
+            variable.trace_remove("write", token)
+        self._source_traces.clear()
+
         # Close the popup
         self.view.popup.dismiss()
         delattr(self.parent_controller, "tiling_wizard_controller")
+
+    def _effective_focus_offsets(self) -> tuple[float, float]:
+        """Resolve the focus offsets used by the selected stack mode.
+
+        Returns
+        -------
+        tuple of float
+            Start and end offsets, both zero for a relative stack with its
+            focus ramp disabled. Remembered ramp values remain untouched.
+
+        Notes
+        -----
+        Read the live Tk controls: this wizard's traces can run before the
+        channels controller has copied a field edit into experiment state.
+        """
+        if (
+            self.stack_acq_frame.position_mode.get() == "Relative"
+            and not self.stack_acq_frame.relative_focus_ramp.get()
+        ):
+            return 0.0, 0.0
+        return (
+            float(self.stack_acq_widgets["start_focus"].get()),
+            float(self.stack_acq_widgets["end_focus"].get()),
+        )
 
     def set_table(self):
         """Set the multipoint table to the values in the tiling wizard
@@ -327,8 +351,9 @@ class TilingWizardController(GUIController):
                 start_pos -= float(self.stack_acq_widgets["start_position"].get())
                 stop_pos -= float(self.stack_acq_widgets["end_position"].get())
             elif axis == self.primary_f_axis:
-                start_pos -= float(self.stack_acq_widgets["start_focus"].get())
-                stop_pos -= float(self.stack_acq_widgets["end_focus"].get())
+                start_focus, end_focus = self._effective_focus_offsets()
+                start_pos -= start_focus
+                stop_pos -= end_focus
 
             start_pos, stop_pos = sort_vars(start_pos, stop_pos)
             tiling_setting[f"{axis}_start"] = start_pos
@@ -562,9 +587,8 @@ class TilingWizardController(GUIController):
                     )
                     axis = self.primary_z_axis
                 elif ax == "f":
-                    f = float(self.stack_acq_widgets["end_focus"].get()) - float(
-                        self.stack_acq_widgets["start_focus"].get()
-                    )
+                    start_focus, end_focus = self._effective_focus_offsets()
+                    f = end_focus - start_focus
                     axis = self.primary_f_axis
                 elif ax == "theta":
                     continue

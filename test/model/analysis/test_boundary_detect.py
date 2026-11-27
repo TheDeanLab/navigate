@@ -210,3 +210,64 @@ def test_map_labels():
         y_pos = (y_start + target_height / 2 - 512) * 1.25
         pos = [y_pos, x_pos, (z - 2) * 1.0 - 300, 0, 0]
         assert pos in position_table[1:]
+
+
+def test_map_labels_multi_tile_grid_advances_every_tile():
+    from navigate.model.analysis.boundary_detect import map_labels
+
+    labeled_image = np.zeros((10, 512, 512), dtype=np.uint16)
+    labeled_image[2:7, 100:250, 100:250] = 1
+
+    z_range, position_table, target_labels = map_labels(
+        labeled_image,
+        position=[0, 0, 0, 0, 0],
+        z_start=-10,
+        z_step=1,
+        x_direction="x",
+        y_direction="y",
+        current_pixel_size=1.0,
+        current_image_width=512,
+        current_image_height=512,
+        target_pixel_size=0.5,
+        target_image_width=100,
+        target_image_height=100,
+        overlap=0.1,
+        filter_pixel_number=1,
+    )
+
+    assert z_range == 5
+    assert target_labels == [0]
+    coords = position_table[1:]
+    assert len(coords) == 16  # 4x4 tile grid
+
+    unique_x = sorted({row[0] for row in coords})
+    unique_y = sorted({row[1] for row in coords})
+    assert len(unique_x) == 4
+    assert len(unique_y) == 4
+    np.testing.assert_allclose(np.diff(unique_x), [45.0, 45.0, 45.0])
+    np.testing.assert_allclose(np.diff(unique_y), [45.0, 45.0, 45.0])
+
+    # Also verify negative direction alignment steps negatively.
+    _, neg_table, _ = map_labels(
+        labeled_image,
+        position=[0, 0, 0, 0, 0],
+        z_start=-10,
+        z_step=1,
+        x_direction="-x",
+        y_direction="-y",
+        current_pixel_size=1.0,
+        current_image_width=512,
+        current_image_height=512,
+        target_pixel_size=0.5,
+        target_image_width=100,
+        target_image_height=100,
+        overlap=0.1,
+        filter_pixel_number=1,
+    )
+    neg_coords = neg_table[1:]
+    neg_x = sorted({row[0] for row in neg_coords}, reverse=True)
+    neg_y = sorted({row[1] for row in neg_coords}, reverse=True)
+    assert len(neg_x) == 4
+    assert len(neg_y) == 4
+    np.testing.assert_allclose(np.diff(neg_x), [-45.0, -45.0, -45.0])
+    np.testing.assert_allclose(np.diff(neg_y), [-45.0, -45.0, -45.0])

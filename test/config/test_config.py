@@ -43,6 +43,7 @@ import yaml
 import sys
 
 # Third Party Imports
+import pytest
 
 # Local Imports
 import navigate.config.config as config
@@ -101,10 +102,14 @@ def test_get_navigate_path():
     assert ".navigate" in path_string
 
 
-def test_get_navigate_path_windows(monkeypatch):
+def test_get_navigate_path_windows(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test that the Navigate path is a string."""
     monkeypatch.setattr(config.platform, "system", lambda: "Windows")
-    monkeypatch.setattr(config.os, "getenv", lambda x: "LOCALAPPDATA")
+    monkeypatch.setattr(
+        config.os,
+        "getenv",
+        lambda key: "LOCALAPPDATA" if key == "LOCALAPPDATA" else None,
+    )
     monkeypatch.setattr(config.os.path, "exists", lambda x: True)
     assert isinstance(config.get_navigate_path(), str)
     path_string = config.get_navigate_path()
@@ -112,10 +117,13 @@ def test_get_navigate_path_windows(monkeypatch):
     assert path_string.endswith(".navigate")
 
 
-def test_get_navigate_path_mac(monkeypatch):
+@pytest.mark.parametrize("system", ["Darwin", "Linux"])
+def test_get_navigate_path_posix(monkeypatch: pytest.MonkeyPatch, system: str) -> None:
     """Test that the Navigate path is a string."""
-    monkeypatch.setattr(config.platform, "system", lambda: "Darwin")
-    monkeypatch.setattr(config.os, "getenv", lambda x: "HOME")
+    monkeypatch.setattr(config.platform, "system", lambda: system)
+    monkeypatch.setattr(
+        config.os, "getenv", lambda key: "HOME" if key == "HOME" else None
+    )
     monkeypatch.setattr(config.os.path, "exists", lambda x: True)
     assert isinstance(config.get_navigate_path(), str)
     path_string = config.get_navigate_path()
@@ -132,17 +140,17 @@ def test_get_configuration_paths():
     assert len(paths) == 7
 
 
-def test_get_configuration_paths_create_dir(monkeypatch):
+def test_get_configuration_paths_create_dir(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
     """Test that the configuration path is created,
     and that they are a list."""
-    monkeypatch.setattr(config, "get_navigate_path", lambda: "TESTPATH")
+    monkeypatch.setattr(config, "get_navigate_path", lambda: str(tmp_path / "profile"))
     paths = config.get_configuration_paths()
     for path in paths:
         assert isinstance(path, pathlib.Path)
         assert os.path.exists(path), "Each configuration yaml file is copied"
         assert path.suffix.lower() in [".yml", ".yaml"]
-    # delete generated folder
-    delete_folder("TESTPATH")
 
 
 # test that the system is exited if no file is provided to load_yaml_config

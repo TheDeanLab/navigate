@@ -87,6 +87,34 @@ If you followed :ref:`uv Installation <install_uv>`:
     navigate -sh
     navigate
 
+.. _isolated_profile:
+
+Using a Separate Profile
+------------------------
+
+Set the ``NAVIGATE_HOME`` environment variable before launching **navigate** to
+keep configuration files, logs, and application state in a separate directory.
+The path names the profile itself; configuration files go in its :file:`config`
+subdirectory. Missing configuration files are copied from the bundled defaults.
+
+For example, to try the application with a separate profile on Linux or macOS:
+
+.. code-block:: console
+
+    NAVIGATE_HOME=/path/to/test-profile navigate -sh
+
+In Windows PowerShell:
+
+.. code-block:: powershell
+
+    $env:NAVIGATE_HOME = "C:\path\to\test-profile"
+    navigate -sh
+
+Unset ``NAVIGATE_HOME`` to return to the usual profile: :file:`~/.navigate` on
+Linux/macOS or :file:`%LOCALAPPDATA%/.navigate` on Windows. Explicit configuration
+file arguments still select the files you supply, so use copies of those files
+when experimenting. Synthetic hardware mode alone does not isolate settings.
+
 .. _command_line_arguments:
 
 Command Line Arguments

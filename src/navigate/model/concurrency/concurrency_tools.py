@@ -162,7 +162,7 @@ class SharedNDArray(np.ndarray):
             None,
         )
         return SharedNDArray, args
-    
+
     def __clean_up_shm(cls, shm):
         try:
             shm.close()
@@ -695,15 +695,18 @@ class _Custody:
             with waiting_list_lock:
                 waiting_list.remove(self)
 
-    def _wait_in_line(self):
+    def _wait_in_line(self) -> None:
         """Wait in line until it's your turn."""
-        waiting_list, _ = _get_list_and_lock(self.target_resource)
+        waiting_list, waiting_list_lock = _get_list_and_lock(self.target_resource)
         if self.has_custody:
             assert self is waiting_list[0]
             return
         # Wait for your number to be called
-        if self is waiting_list[0] and self.permission_slip.locked():
-            self.permission_slip.release()  # We arrived to an empty waiting list
+        # Queue removal and permission handoff use this same lock. Without it,
+        # a new head can race its predecessor and both release the same slip.
+        with waiting_list_lock:
+            if self is waiting_list[0] and self.permission_slip.locked():
+                self.permission_slip.release()  # We arrived to an empty waiting list
         self.permission_slip.acquire()  # Blocks if we're not first in line
         self.has_custody = True
 

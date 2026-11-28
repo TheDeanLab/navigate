@@ -134,3 +134,34 @@ The Windows constraint files reproduce complete environments that passed the
 test suite. They control dependency versions during installation without
 adding every transitive dependency to :file:`pyproject.toml`. Always select the
 constraint file that matches the environment's Python version.
+
+
+Running Tests with Isolated Settings
+------------------------------------
+
+Run tests from the repository root with the checkout on the import path:
+
+.. code-block:: console
+
+    PYTHONPATH=src python -m pytest -p no:cov -o addopts= -m "not hardware and not integration"
+
+The pytest configuration creates a disposable profile before test modules are
+imported. It sets ``NAVIGATE_HOME`` for the session and child processes, replacing
+any existing value for the duration of the run. Tests therefore start from the
+bundled defaults instead of your microscope settings. The original environment
+value is restored and the temporary profile is removed at session cleanup.
+
+A Python filesystem guard also blocks writes to the normal user profile,
+an externally supplied profile, and the bundled configuration files. A blocked
+attempt fails the session even if application code catches the exception.
+Controller fixtures copy configuration files before passing them to code that
+saves settings. Use temporary copies for any new test that edits configuration.
+The guard wraps filesystem APIs, including directory-relative writes and cached
+``pathlib`` operations. It also installs an audit hook except on CPython before
+3.12, where Python audit hooks can break concurrent coverage or debugger startup.
+It is a regression guard for Python file operations, not an operating system
+sandbox; do not invoke external commands that write to live profiles.
+
+Hardware tests also use a disposable profile. Supply an explicit temporary copy
+of the required hardware configuration when a test needs a specific microscope.
+For application runs outside pytest, use :ref:`isolated_profile`.

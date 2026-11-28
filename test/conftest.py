@@ -31,6 +31,7 @@
 #"""
 
 # Standard Library Imports
+import logging
 import os
 from pathlib import Path
 import sys
@@ -66,6 +67,9 @@ def pytest_configure(config: pytest.Config) -> None:
     sys.addaudithook(guard)
 
     def cleanup() -> None:
+        # Windows cannot remove profile logs while FileHandlers still own them.
+        # Close them after pytest teardown and before deleting the sandbox.
+        logging.shutdown()
         guard.enabled = False
         if previous_profile is None:
             os.environ.pop("NAVIGATE_HOME", None)

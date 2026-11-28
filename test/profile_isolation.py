@@ -26,7 +26,14 @@ class ProfileWriteGuard:
     ) -> None:
         if not isinstance(path, (str, bytes, os.PathLike)):
             return
-        path = Path(os.fsdecode(path))
+        path = os.fsdecode(path)
+        # Pytest's logging handler opens the null device. Windows Python 3.9
+        # cannot resolve its device-namespace path with Path.resolve().
+        if os.path.normcase(os.path.abspath(path)).rstrip("\\/") == os.path.normcase(
+            os.path.abspath(os.devnull)
+        ).rstrip("\\/"):
+            return
+        path = Path(path)
         if not path.is_absolute() and dir_fd not in (None, -1):
             # Linux exposes directory descriptors here. Fail closed elsewhere
             # rather than allowing a relative write whose destination is unknown.

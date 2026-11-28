@@ -20,6 +20,26 @@ def _save_child_profile(result_path: str) -> None:
     Path(result_path).write_text(json.dumps([str(path) for path in paths]))
 
 
+@pytest.mark.parametrize("filename", [os.devnull, os.path.abspath(os.devnull)])
+def test_write_guard_allows_null_device_without_resolving(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, filename: str
+) -> None:
+    """Null-device logging must work even when Windows cannot resolve NUL."""
+    guard = ProfileWriteGuard([tmp_path / "protected"])
+    original_resolve = Path.resolve
+
+    def resolve(path: Path, strict: bool = False) -> Path:
+        if path == Path(os.path.abspath(os.devnull)):
+            raise OSError(87, "The parameter is incorrect")
+        return original_resolve(path, strict=strict)
+
+    monkeypatch.setattr(Path, "resolve", resolve)
+    guard("open", (filename, "w", os.O_WRONLY))
+    with open(filename, "w") as stream:
+        stream.write("discarded")
+    assert guard.violations == []
+
+
 def test_profile_override_creates_nested_directory(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -119,6 +139,7 @@ def test_pytest_isolates_before_collection_and_detects_swallowed_writes(
     sentinel.write_text("original settings")
     test_module = tmp_path / "test_nested.py"
     test_module.write_text("""
+import logging
 import os
 from pathlib import Path
 from navigate.config.config import get_configuration_paths, get_navigate_path
@@ -129,6 +150,8 @@ assert profile != Path(os.environ["TEST_ORIGINAL_PROFILE"])
 assert "navigate-pytest-" in str(profile)
 Path(os.environ["TEST_PROFILE_RECORD"]).write_text(str(profile))
 get_configuration_paths()[1].write_text("collection settings")
+handler = logging.FileHandler(profile / "left-open.log")
+logging.getLogger().addHandler(handler)
 
 def test_save():
     get_configuration_paths()[1].write_text("shutdown settings")
@@ -151,7 +174,8 @@ def test_save():
             "-c",
             "import os, sys, pytest; original = os.environ['NAVIGATE_HOME']; "
             "code = pytest.main(sys.argv[1:]); "
-            "assert os.environ['NAVIGATE_HOME'] == original; sys.exit(code)",
+            "assert os.environ['NAVIGATE_HOME'] == original; "
+            "assert sys.modules['test_nested'].handler.stream is None; sys.exit(code)",
             "-p",
             "test.conftest",
             "-p",

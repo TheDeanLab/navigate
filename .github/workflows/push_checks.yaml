@@ -1,60 +1,68 @@
-name: Diagnose remaining Python 3.10 CI stall
+name: Validate profile guard tracing compatibility
 on:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  diagnose:
-    name: Bounded joins (coverage=${{ matrix.coverage }})
-    runs-on: ubuntu-24.04
-    timeout-minutes: 40
+  validate:
+    name: Guard compatibility (${{ matrix.os }}, ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        coverage: ["normal", "disabled"]
+        include:
+          - {os: ubuntu-24.04, python: "3.10", tag: py310}
+          - {os: windows-latest, python: "3.11", tag: py311}
+          - {os: ubuntu-24.04, python: "3.12", tag: py312}
     env:
       MPLBACKEND: Agg
       PYTHONPATH: src
       NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
-      COVERAGE_FILE: .coverage.ubuntu-24.04.py310
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ef3994c265c0fb52daf9eb8ac7280bc3c6bf5aaa
+          ref: b946eb3cfa07148ed77faa62f39990780e74c077
       - name: Install Linux display dependencies
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb xauth libegl1 libopengl0
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python }}
           cache: pip
-          cache-dependency-path: constraints/windows-py310.txt
+          cache-dependency-path: constraints/windows-${{ matrix.tag }}.txt
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -c constraints/windows-py310.txt -e ".[dev]"
-      - name: Cache Bio-Formats validation archive
-        uses: actions/cache@v6
-        with:
-          path: .pytest_cache/d/bioformats
-          key: ${{ runner.os }}-bioformats-${{ hashFiles('test/model/metadata_sources/bioformats.py') }}
-      - name: Bound the join so pytest reports captured worker exceptions
+          pip install -c constraints/windows-${{ matrix.tag }}.txt -e ".[dev]"
+      - name: Prove the regression rejects the original audit-hook installation
+        if: runner.os == 'Linux' && matrix.python == '3.10'
+        shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
-          p = Path("test/model/concurrency/test_concurrency_tools.py")
+          p = Path("test/config/test_profile_isolation.py")
           text = p.read_text()
-          old = "    for th in threads:\n        th.get_result()\n"
-          new = "    for th in threads:\n        th.get_result(timeout=10)\n        assert not th.is_alive(), [(t._args, vars(t), vars(t.custody)) for t in threads if not t.is_alive() and t.custody.target_resource is not None]\n"
-          assert text.count(old) == 1
-          p.write_text(text.replace(old, new))
+          assert text.count("guard.install()") == 2
+          p.write_text(text.replace("guard.install()", "sys.addaudithook(guard)"))
           PY
-      - name: Full test order with bounded concurrency joins
-        shell: bash
-        run: |
-          if [[ "${{ matrix.coverage }}" == "disabled" ]]; then
-            timeout --signal=TERM --kill-after=10s 1800s xvfb-run -a python -m pytest -p no:xvfb --no-cov --maxfail=1 --durations=25 -o faulthandler_timeout=60
-          else
-            timeout --signal=TERM --kill-after=10s 1800s xvfb-run -a python -m pytest -p no:xvfb --maxfail=1 --durations=25 -o faulthandler_timeout=60
-          fi
+          set +e
+          python -m pytest -p no:xvfb -p no:cov -o addopts= test/config/test_profile_isolation.py::test_write_guard_preserves_traced_thread_startup_and_restores_apis -q > negative-control.log 2>&1
+          status=$?
+          set -e
+          git restore test/config/test_profile_isolation.py
+          cat negative-control.log
+          test "$status" -eq 1
+          grep -q 'Cannot install a trace function while another trace function is being installed' negative-control.log
+      - name: Focused profile, controller, and concurrency tests (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python -m pytest -p no:xvfb test/config/test_profile_isolation.py test/controller/test_controller.py test/model/concurrency --durations=10
+      - name: Focused profile, controller, and concurrency tests (Windows)
+        if: runner.os == 'Windows'
+        run: python -m pytest test/config/test_profile_isolation.py test/controller/test_controller.py test/model/concurrency --durations=10
+      - name: Full normal suite with coverage on Python 3.10
+        if: runner.os == 'Linux' && matrix.python == '3.10'
+        timeout-minutes: 45
+        run: xvfb-run -a python -m pytest -p no:xvfb --durations=25

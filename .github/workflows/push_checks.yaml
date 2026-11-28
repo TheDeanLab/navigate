@@ -1,26 +1,33 @@
 name: Diagnose PR 1276 Linux Python 3.10
-
 on:
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   diagnose:
-    name: Garbage collection ${{ matrix.collect_gui_garbage }}
+    name: Audit and coverage (${{ matrix.case }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        collect_gui_garbage: ["0", "1"]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
+        include:
+          - case: original
+            audit: normal
+            coverage: ""
+          - case: traceable
+            audit: traceable
+            coverage: ""
+          - case: no-coverage
+            audit: normal
+            coverage: "--no-cov"
+          - case: no-audit-hook
+            audit: skip
+            coverage: ""
     env:
-      NAVIGATE_DIAGNOSTIC_GC: ${{ matrix.collect_gui_garbage }}
-      NAVIGATE_DIAGNOSTIC_FORCE_WORKER_GC: "1"
       MPLBACKEND: Agg
       PYTHONPATH: src
-      NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
+      NAVIGATE_AUDIT_DIAGNOSTIC: ${{ matrix.audit }}
       COVERAGE_FILE: .coverage.linux310.diagnostic
     steps:
       - uses: actions/checkout@v7
@@ -37,12 +44,8 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -c constraints/windows-py310.txt -e ".[dev]"
-      - name: Record resolved environment
-        run: python -m pip freeze --all
-      - name: Cache Bio-Formats validation archive
-        uses: actions/cache@v6
-        with:
-          path: .pytest_cache/d/bioformats
-          key: ${{ runner.os }}-bioformats-${{ hashFiles('test/model/metadata_sources/bioformats.py') }}
-      - name: Focused controller and concurrency reproduction
-        run: timeout --signal=TERM --kill-after=15s 240s xvfb-run -a python .github/ci/pr1276_hang_probe.py -p no:xvfb --durations=5 test/controller/test_controller.py test/model/concurrency/test_concurrency_tools.py
+      - name: Focused tests without the diagnostic Python wrapper
+        run: timeout --signal=TERM --kill-after=10s 180s xvfb-run -a python -m pytest -p no:xvfb ${{ matrix.coverage }} --durations=5 -o faulthandler_timeout=30 test/controller/test_controller.py test/model/concurrency/test_concurrency_tools.py
+      - name: Verify profile protections remain active
+        if: matrix.audit != 'skip'
+        run: python -m pytest -p no:xvfb -p no:cov -o addopts= test/config/test_profile_isolation.py -q

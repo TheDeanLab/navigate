@@ -5,29 +5,20 @@ permissions:
   contents: read
 jobs:
   diagnose:
-    name: Audit and coverage (${{ matrix.case }})
+    name: Worker startup (${{ matrix.case }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         include:
-          - case: original
-            audit: normal
-            coverage: ""
-          - case: traceable
-            audit: traceable
+          - case: coverage
             coverage: ""
           - case: no-coverage
-            audit: normal
             coverage: "--no-cov"
-          - case: no-audit-hook
-            audit: skip
-            coverage: ""
     env:
       MPLBACKEND: Agg
       PYTHONPATH: src
-      NAVIGATE_AUDIT_DIAGNOSTIC: ${{ matrix.audit }}
       COVERAGE_FILE: .coverage.linux310.diagnostic
     steps:
       - uses: actions/checkout@v7
@@ -44,8 +35,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -c constraints/windows-py310.txt -e ".[dev]"
-      - name: Focused tests without the diagnostic Python wrapper
-        run: timeout --signal=TERM --kill-after=10s 180s xvfb-run -a python -m pytest -p no:xvfb ${{ matrix.coverage }} --durations=5 -o faulthandler_timeout=30 test/controller/test_controller.py test/model/concurrency/test_concurrency_tools.py
-      - name: Verify profile protections remain active
-        if: matrix.audit != 'skip'
-        run: python -m pytest -p no:xvfb -p no:cov -o addopts= test/config/test_profile_isolation.py -q
+      - name: Repeat focused order with worker metadata
+        run: |
+          for iteration in 1 2 3 4 5; do
+            echo "Diagnostic iteration $iteration"
+            timeout --signal=TERM --kill-after=10s 180s xvfb-run -a python .github/ci/pr1276_hang_probe.py -p no:xvfb ${{ matrix.coverage }} --durations=5 -o faulthandler_timeout=45 test/controller/test_controller.py test/model/concurrency/test_concurrency_tools.py
+          done

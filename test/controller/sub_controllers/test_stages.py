@@ -60,6 +60,7 @@ def initialize_controller():
             stage_axes=axes,
             all_stage_axes=axes,
             microscope_name="scope",
+            microscope_config={"stage": {}},
             gui_setting=gui_settings,
             stage_flip_flags={},
             stage_home_position={},

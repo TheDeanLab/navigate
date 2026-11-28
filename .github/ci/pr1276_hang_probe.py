@@ -20,6 +20,8 @@ class Probe:
             return (yield)
 
         previous_hook = threading.excepthook
+        previous_unraisable = sys.unraisablehook
+        previous_bootstrap = threading.Thread._bootstrap
 
         def report(args: threading.ExceptHookArgs) -> None:
             print("\nWORKER EXCEPTION:", file=DIAGNOSTIC_STREAM, flush=True)
@@ -31,6 +33,37 @@ class Probe:
             )
             DIAGNOSTIC_STREAM.flush()
             previous_hook(args)
+
+        def report_unraisable(args: Any) -> None:
+            print(
+                "\nUNRAISABLE:",
+                args.err_msg,
+                repr(args.object),
+                file=DIAGNOSTIC_STREAM,
+                flush=True,
+            )
+            traceback.print_exception(
+                args.exc_type,
+                args.exc_value,
+                args.exc_traceback,
+                file=DIAGNOSTIC_STREAM,
+            )
+            DIAGNOSTIC_STREAM.flush()
+            previous_unraisable(args)
+
+        def bootstrap(thread: threading.Thread) -> None:
+            try:
+                previous_bootstrap(thread)
+            except BaseException:
+                print(
+                    "\nBOOTSTRAP FAILURE:",
+                    thread.name,
+                    file=DIAGNOSTIC_STREAM,
+                    flush=True,
+                )
+                traceback.print_exc(file=DIAGNOSTIC_STREAM)
+                DIAGNOSTIC_STREAM.flush()
+                raise
 
         def snapshot() -> None:
             print("\nQUEUE OWNERSHIP AT HANG:", file=DIAGNOSTIC_STREAM, flush=True)
@@ -56,6 +89,12 @@ class Probe:
                 for i, thread in enumerate(threads):
                     if not thread.is_alive() or thread.custody.has_custody:
                         print(
+                            "THREAD METADATA",
+                            i,
+                            thread.__dict__,
+                            file=DIAGNOSTIC_STREAM,
+                        )
+                        print(
                             i,
                             "alive",
                             thread.is_alive(),
@@ -76,6 +115,8 @@ class Probe:
             os._exit(124)
 
         threading.excepthook = report
+        sys.unraisablehook = report_unraisable
+        threading.Thread._bootstrap = bootstrap
         timer = threading.Timer(30, snapshot)
         timer.daemon = True
         timer.start()
@@ -84,6 +125,8 @@ class Probe:
         finally:
             timer.cancel()
             threading.excepthook = previous_hook
+            sys.unraisablehook = previous_unraisable
+            threading.Thread._bootstrap = previous_bootstrap
 
 
 if __name__ == "__main__":

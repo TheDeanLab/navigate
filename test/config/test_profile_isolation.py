@@ -77,10 +77,23 @@ def test_profile_override_is_inherited_by_spawn(
 
 
 @pytest.mark.parametrize(
-    "operation", ["write", "append", "os_open", "unlink", "replace", "symlink"]
+    "operation",
+    [
+        "write",
+        "append",
+        "file_io",
+        "os_open",
+        "unlink",
+        "replace",
+        "symlink",
+        "mkdir",
+        "chmod",
+        "utime",
+        "truncate",
+    ],
 )
 def test_write_guard_blocks_mutations(tmp_path: Path, operation: str) -> None:
-    """Check real audit hooks against disposable sentinel files, never live ones."""
+    """Check installed protection against disposable sentinels, never live files."""
     protected = tmp_path / "protected"
     protected.mkdir()
     target = protected / "experiment.yml"
@@ -97,20 +110,26 @@ def test_write_guard_blocks_mutations(tmp_path: Path, operation: str) -> None:
     replacement.write_text("replacement")
     script = """
 import os
+import io
 from pathlib import Path
 import sys
 from test.profile_isolation import ProfileWriteGuard
 protected, replacement, operation = map(str, sys.argv[1:])
 guard = ProfileWriteGuard([Path(protected)])
-sys.addaudithook(guard)
+guard.install()
 target = Path(protected) / "experiment.yml"
 try:
     if operation == "write": target.write_text("changed")
     elif operation == "append":
         with target.open("a") as stream: stream.write("changed")
     elif operation == "os_open": os.open(target, os.O_WRONLY | os.O_TRUNC)
+    elif operation == "file_io": io.FileIO(target, "w")
     elif operation == "unlink": target.unlink()
     elif operation == "replace": os.replace(replacement, target)
+    elif operation == "mkdir": (target.parent / "new").mkdir()
+    elif operation == "chmod": target.chmod(0o600)
+    elif operation == "utime": os.utime(target, None)
+    elif operation == "truncate": os.truncate(target, 0)
     elif operation == "symlink":
         alias = Path(replacement).with_name("alias")
         alias.symlink_to(target)
@@ -122,6 +141,77 @@ else:
 """
     subprocess.run(
         [sys.executable, "-c", script, str(protected), str(replacement), operation],
+        check=True,
+        timeout=30,
+    )
+    assert target.read_text() == "original settings"
+
+
+def test_write_guard_preserves_traced_thread_startup_and_restores_apis(
+    tmp_path: Path,
+) -> None:
+    """Force overlapping trace installation without losing worker write checks."""
+    protected = tmp_path / "protected"
+    protected.mkdir()
+    target = protected / "experiment.yml"
+    target.write_text("original settings")
+    script = """
+import builtins
+import io
+import os
+from pathlib import Path
+import sys
+import threading
+import time
+from test.profile_isolation import ProfileWriteGuard
+
+class SlowAuditGuard(ProfileWriteGuard):
+    def __call__(self, event, args):
+        if event == "sys.settrace":
+            # Deterministically overlap trace installation if an audit hook is
+            # incorrectly registered on affected CPython versions.
+            time.sleep(0.02)
+        super().__call__(event, args)
+
+def trace(frame, event, arg):
+    return trace
+
+errors = []
+sys.unraisablehook = lambda event: errors.append(repr(event.exc_value))
+threading.excepthook = lambda event: errors.append(repr(event.exc_value))
+threading.settrace(trace)
+target = Path(sys.argv[1])
+originals = builtins.open, io.open, io.FileIO, os.open, os.unlink
+guard = SlowAuditGuard([target.parent])
+guard.install()
+completed = []
+
+def worker():
+    try:
+        target.write_text("bad")
+    except PermissionError:
+        completed.append(True)
+    else:
+        errors.append("Worker changed protected settings")
+
+threads = [threading.Thread(target=worker, daemon=True) for _ in range(20)]
+try:
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=5)
+    assert all(not thread.is_alive() for thread in threads)
+    assert not errors, errors
+    assert len(completed) == len(threads)
+    assert len(guard.violations) == len(threads)
+finally:
+    guard.close()
+    threading.settrace(None)
+assert (builtins.open, io.open, io.FileIO, os.open, os.unlink) == originals
+assert target.read_text() == "original settings"
+"""
+    subprocess.run(
+        [sys.executable, "-c", script, str(target)],
         check=True,
         timeout=30,
     )

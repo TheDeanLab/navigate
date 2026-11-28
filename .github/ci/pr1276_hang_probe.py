@@ -1,5 +1,6 @@
 """Expose worker exceptions and queue ownership during the remote CI hang."""
 
+import gc
 import os
 import sys
 import threading
@@ -19,9 +20,14 @@ class Probe:
         if item.name != "test_lock_with_waitlist":
             return (yield)
 
+        if os.environ.get("NAVIGATE_DIAGNOSTIC_GC") == "1":
+            collected = gc.collect()
+            print(
+                "MAIN THREAD COLLECTION:", collected, file=DIAGNOSTIC_STREAM, flush=True
+            )
+
         previous_hook = threading.excepthook
         previous_unraisable = sys.unraisablehook
-        previous_bootstrap = threading.Thread._bootstrap
 
         def report(args: threading.ExceptHookArgs) -> None:
             print("\nWORKER EXCEPTION:", file=DIAGNOSTIC_STREAM, flush=True)
@@ -50,20 +56,6 @@ class Probe:
             )
             DIAGNOSTIC_STREAM.flush()
             previous_unraisable(args)
-
-        def bootstrap(thread: threading.Thread) -> None:
-            try:
-                previous_bootstrap(thread)
-            except BaseException:
-                print(
-                    "\nBOOTSTRAP FAILURE:",
-                    thread.name,
-                    file=DIAGNOSTIC_STREAM,
-                    flush=True,
-                )
-                traceback.print_exc(file=DIAGNOSTIC_STREAM)
-                DIAGNOSTIC_STREAM.flush()
-                raise
 
         def snapshot() -> None:
             print("\nQUEUE OWNERSHIP AT HANG:", file=DIAGNOSTIC_STREAM, flush=True)
@@ -116,7 +108,6 @@ class Probe:
 
         threading.excepthook = report
         sys.unraisablehook = report_unraisable
-        threading.Thread._bootstrap = bootstrap
         timer = threading.Timer(30, snapshot)
         timer.daemon = True
         timer.start()
@@ -126,7 +117,6 @@ class Probe:
             timer.cancel()
             threading.excepthook = previous_hook
             sys.unraisablehook = previous_unraisable
-            threading.Thread._bootstrap = previous_bootstrap
 
 
 if __name__ == "__main__":

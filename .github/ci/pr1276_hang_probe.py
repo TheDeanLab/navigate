@@ -28,6 +28,21 @@ class Probe:
 
         previous_hook = threading.excepthook
         previous_unraisable = sys.unraisablehook
+        from navigate.model.concurrency.concurrency_tools import ResultThread
+
+        previous_run = ResultThread.run
+
+        def run(thread: ResultThread) -> None:
+            if thread._args == (0,):
+                print("WORKER COLLECTION START", file=DIAGNOSTIC_STREAM, flush=True)
+                collected = gc.collect()
+                print(
+                    "WORKER COLLECTION END",
+                    collected,
+                    file=DIAGNOSTIC_STREAM,
+                    flush=True,
+                )
+            return previous_run(thread)
 
         def report(args: threading.ExceptHookArgs) -> None:
             print("\nWORKER EXCEPTION:", file=DIAGNOSTIC_STREAM, flush=True)
@@ -108,6 +123,8 @@ class Probe:
 
         threading.excepthook = report
         sys.unraisablehook = report_unraisable
+        if os.environ.get("NAVIGATE_DIAGNOSTIC_FORCE_WORKER_GC") == "1":
+            ResultThread.run = run
         timer = threading.Timer(30, snapshot)
         timer.daemon = True
         timer.start()
@@ -117,8 +134,11 @@ class Probe:
             timer.cancel()
             threading.excepthook = previous_hook
             sys.unraisablehook = previous_unraisable
+            ResultThread.run = previous_run
 
 
 if __name__ == "__main__":
     sys.path.insert(0, os.getcwd())
+    if os.environ.get("NAVIGATE_DIAGNOSTIC_FORCE_WORKER_GC") == "1":
+        gc.disable()
     raise SystemExit(pytest.main(sys.argv[1:], plugins=[Probe()]))

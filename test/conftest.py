@@ -34,7 +34,6 @@
 import logging
 import os
 from pathlib import Path
-import sys
 import tempfile
 import tkinter as tk
 
@@ -64,13 +63,13 @@ def pytest_configure(config: pytest.Config) -> None:
     os.environ["NAVIGATE_HOME"] = str(Path(sandbox.name) / ".navigate")
     guard = ProfileWriteGuard(protected)
     config.stash[_PROFILE_GUARD] = guard
-    sys.addaudithook(guard)
+    guard.install()
 
     def cleanup() -> None:
         # Windows cannot remove profile logs while FileHandlers still own them.
         # Close them after pytest teardown and before deleting the sandbox.
         logging.shutdown()
-        guard.enabled = False
+        guard.close()
         if previous_profile is None:
             os.environ.pop("NAVIGATE_HOME", None)
         else:

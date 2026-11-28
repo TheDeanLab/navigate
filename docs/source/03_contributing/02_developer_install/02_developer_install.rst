@@ -151,13 +151,16 @@ any existing value for the duration of the run. Tests therefore start from the
 bundled defaults instead of your microscope settings. The original environment
 value is restored and the temporary profile is removed at session cleanup.
 
-A Python filesystem audit hook also blocks writes to the normal user profile,
+A Python filesystem guard also blocks writes to the normal user profile,
 an externally supplied profile, and the bundled configuration files. A blocked
 attempt fails the session even if application code catches the exception.
 Controller fixtures copy configuration files before passing them to code that
 saves settings. Use temporary copies for any new test that edits configuration.
-The audit hook is a regression guard for Python file operations, not an operating
-system sandbox; do not invoke external commands that write to live profiles.
+The guard uses an audit hook where supported and filesystem API wrappers on
+CPython before 3.12, where Python audit hooks can break concurrent coverage or
+debugger startup. It is a regression guard for Python file operations, not an
+operating system sandbox; do not invoke external commands that write to live
+profiles.
 
 Hardware tests also use a disposable profile. Supply an explicit temporary copy
 of the required hardware configuration when a test needs a specific microscope.

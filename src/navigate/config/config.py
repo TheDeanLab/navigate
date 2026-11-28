@@ -64,23 +64,31 @@ GUI_SETTING_DEFAULTS = {
 }
 
 
-def get_navigate_path():
-    """Establish a program home directory in AppData/Local/.navigate for Windows
-    or ~/.navigate for Mac and Linux.
+def get_navigate_path() -> str:
+    """Create and return the Navigate profile directory.
+
+    ``NAVIGATE_HOME`` overrides the entire profile path, including configuration,
+    logs, and other application state. Otherwise use AppData/Local/.navigate on
+    Windows or ~/.navigate on Mac and Linux. The override is inherited by model
+    subprocesses, so isolated application runs do not share the user's profile.
 
     Returns
     -------
     str
         Path to Navigate home directory.
     """
-    if platform.system() == "Windows":
-        base_directory = os.getenv("LOCALAPPDATA")
+    profile_directory = os.getenv("NAVIGATE_HOME")
+    if profile_directory:
+        navigate_path = os.path.abspath(os.path.expanduser(profile_directory))
     else:
-        base_directory = os.getenv("HOME")
-    navigate_path = os.path.join(base_directory, ".navigate")
+        if platform.system() == "Windows":
+            base_directory = os.getenv("LOCALAPPDATA")
+        else:
+            base_directory = os.getenv("HOME")
+        navigate_path = os.path.join(base_directory, ".navigate")
 
     if not os.path.exists(navigate_path):
-        os.mkdir(navigate_path)
+        os.makedirs(navigate_path, exist_ok=True)
 
     return navigate_path
 

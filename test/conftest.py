@@ -32,12 +32,60 @@
 
 # Standard Library Imports
 import os
+from pathlib import Path
+import sys
+import tempfile
 import tkinter as tk
 
 # Third Party Imports
 import pytest
 
 # Local Imports
+from test.profile_isolation import ProfileWriteGuard
+
+_PROFILE_GUARD = pytest.StashKey[ProfileWriteGuard]()
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    """Isolate profile paths before collecting/importing any application tests."""
+    protected = [Path.home() / ".navigate"]
+    if os.environ.get("LOCALAPPDATA"):
+        protected.append(Path(os.environ["LOCALAPPDATA"]) / ".navigate")
+    previous_profile = os.environ.get("NAVIGATE_HOME")
+    if previous_profile:
+        protected.append(Path(previous_profile).expanduser())
+    source_config = Path(__file__).resolve().parents[1] / "src/navigate/config"
+    protected.extend(source_config.glob("*.y*ml"))
+
+    # Do not reuse an externally supplied profile, even for hardware tests.
+    # The environment override also reaches spawn/fork and exec subprocesses.
+    sandbox = tempfile.TemporaryDirectory(prefix="navigate-pytest-")
+    os.environ["NAVIGATE_HOME"] = str(Path(sandbox.name) / ".navigate")
+    guard = ProfileWriteGuard(protected)
+    config.stash[_PROFILE_GUARD] = guard
+    sys.addaudithook(guard)
+
+    def cleanup() -> None:
+        guard.enabled = False
+        if previous_profile is None:
+            os.environ.pop("NAVIGATE_HOME", None)
+        else:
+            os.environ["NAVIGATE_HOME"] = previous_profile
+        sandbox.cleanup()
+
+    config.add_cleanup(cleanup)
+
+
+def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
+    """Fail even if application code swallowed a forbidden-write exception."""
+    guard = session.config.stash[_PROFILE_GUARD]
+    if guard.violations:
+        session.exitstatus = pytest.ExitCode.TESTS_FAILED
+        reporter = session.config.pluginmanager.get_plugin("terminalreporter")
+        if reporter:
+            reporter.write_sep("=", "Blocked writes to protected profiles")
+            for message in sorted(set(guard.violations)):
+                reporter.write_line(message)
 
 
 @pytest.fixture(scope="package")

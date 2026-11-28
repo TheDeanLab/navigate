@@ -1,8 +1,10 @@
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
+from typing import TYPE_CHECKING, Iterator
 from unittest.mock import MagicMock, ANY, patch
 import queue
+import shutil
 import pytest
 import numpy
 import multiprocessing as mp
@@ -10,6 +12,9 @@ import logging
 import platform
 import tkinter as tk
 from logging.handlers import QueueHandler
+
+if TYPE_CHECKING:
+    from navigate.controller.controller import Controller
 
 
 class _NullQueue:
@@ -120,13 +125,19 @@ def controller_root():
 
 
 @pytest.fixture(scope="module")
-def controller(controller_root):
+def controller(
+    controller_root: tk.Tk, tmp_path_factory: pytest.TempPathFactory
+) -> Iterator["Controller"]:
     from navigate.controller.controller import Controller
 
     base_directory = Path.joinpath(
         Path(__file__).resolve().parent.parent.parent, "src", "navigate"
     )
-    configuration_directory = Path.joinpath(base_directory, "config")
+    # Controller shutdown saves GUI settings to the loaded file. Never hand it
+    # a writable path inside the source tree.
+    configuration_directory = tmp_path_factory.mktemp("controller-config")
+    for source in (base_directory / "config").glob("*.y*ml"):
+        shutil.copy2(source, configuration_directory / source.name)
 
     configuration_path = Path.joinpath(configuration_directory, "configuration.yaml")
     experiment_path = Path.joinpath(configuration_directory, "experiment.yml")

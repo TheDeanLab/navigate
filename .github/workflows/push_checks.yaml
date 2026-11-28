@@ -37,5 +37,7 @@ jobs:
         with:
           path: .pytest_cache/d/bioformats
           key: ${{ runner.os }}-bioformats-${{ hashFiles('test/model/metadata_sources/bioformats.py') }}
-      - name: Run unchanged tests with hang diagnostics
-        run: timeout --signal=TERM --kill-after=15s 1200s xvfb-run -a python -m pytest -p no:xvfb --durations=25 -o faulthandler_timeout=60
+      - name: Focused controller and concurrency reproduction
+        run: timeout --signal=TERM --kill-after=15s 240s xvfb-run -a python .github/ci/pr1276_hang_probe.py -p no:xvfb --durations=5 test/controller/test_controller.py test/model/concurrency/test_concurrency_tools.py
+      - name: Full test order with worker exception diagnostics
+        run: timeout --signal=TERM --kill-after=15s 1200s xvfb-run -a python .github/ci/pr1276_hang_probe.py -p no:xvfb --durations=25

@@ -256,6 +256,49 @@ axes. Define joystick axes in the stage section:
 
    joystick_axes: [y]
 
+.. _idle_stage_position_refresh:
+
+Automatic Idle Position Refresh
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+While **navigate** is idle, supported stages refresh their displayed coordinates
+approximately once per second. This lets you see joystick movement without
+pressing :guilabel:`Stop Stages`. Automatic refresh reads coordinates without
+stopping or moving the stage. It pauses during all acquisitions, including
+continuous acquisition, and during software-controlled stage operations.
+
+This release supports synthetic stages and ASI stages whose shared controller
+has a known axis order and read/write timeouts greater than zero and no longer
+than one second. Other stages retain their existing manual refresh behavior.
+Slow responses reduce the refresh rate; communication failures trigger longer
+retry intervals. An in-progress serial query must finish or time out before
+another command can use that connection.
+
+Before enabling polling on physical hardware, verify joystick readbacks and
+Stop Stages response timing. On an ASI MS2000, also verify repeated readbacks
+interleaved with normal movement commands: the bounded polling transaction
+reads its complete reply directly, without the normal command path's buffer
+cleanup or 0.1-second post-write delay. Emulated-device tests do not establish
+that this timing is suitable for a particular controller or firmware.
+
+The small indicator at the right of the :guilabel:`Stage Positions` heading
+briefly lights after each successful refresh and is dark otherwise. Hover over
+it for details about paused, stale, partial, or unavailable readbacks. Failed
+reads leave the last displayed coordinates in place. A coordinate being edited
+or waiting for a move is not replaced by an automatic readback.
+
+Refresh is enabled by default for supported devices. Open
+:guilabel:`Advanced Parameters` below :guilabel:`Z-Stack Start/Stop` on the
+:guilabel:`Stage Control` tab, select a microscope, and change
+:guilabel:`Stage Polling Enabled` beside :guilabel:`Stage Limits Enabled`.
+The change applies immediately; use :guilabel:`Save` to retain it across launches.
+The checkbox is unchecked and read-only when the selected microscope has no
+supported stages. In a mixed configuration, only supported stages are polled.
+
+The preference is stored as ``position_polling`` directly under the microscope's
+``stage`` section in :file:`configuration.yaml`, alongside ``hardware`` and
+``joystick_axes``. If editing that file manually, restart **navigate** afterward.
+
 Zoom Subsection
 ^^^^^^^^^^^^^^^
 

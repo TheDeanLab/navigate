@@ -40,6 +40,7 @@ from typing import Optional
 
 # Local Imports
 from navigate.model.devices.stage.base import StageBase
+from navigate.model.devices.stage.readback import StagePositionReadback
 from navigate.tools.decorators import log_initialization
 
 # Logger Setup
@@ -48,7 +49,7 @@ logger = logging.getLogger(p)
 
 
 @log_initialization
-class SyntheticStage(StageBase):
+class SyntheticStage(StageBase, StagePositionReadback):
     """Synthetically generated stage for testing purposes."""
 
     def __init__(
@@ -91,6 +92,28 @@ class SyntheticStage(StageBase):
     def __del__(self) -> None:
         """Destructor."""
         pass
+
+    @property
+    def position_readback_identity(self) -> object:
+        """Return this synthetic device's identity."""
+        return self
+
+    def read_position_for_monitor(
+        self, peers: tuple[StagePositionReadback, ...] = ()
+    ) -> dict[str, float]:
+        """Return synthetic coordinates without issuing a movement.
+
+        Parameters
+        ----------
+        peers : tuple[StagePositionReadback, ...]
+            Unused; each synthetic stage has its own connection identity.
+
+        Returns
+        -------
+        dict
+            Current simulated software-axis coordinates.
+        """
+        return self.get_position_dict()
 
     def report_position(self) -> dict[str, float]:
         """Report the current position of the stage.

@@ -32,7 +32,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-
 # Local Imports
 from navigate.view.custom_widgets.popup import PopUp
 from navigate.view.custom_widgets.validation import ValidatedSpinbox, ValidatedCombobox
@@ -86,6 +85,11 @@ class AdvancedStageParametersPopup:
 
         #: Checkbutton: Checkbox for the stage limits.
         self.stage_limits_enabled = None
+
+        #: BooleanVar: Requested idle position polling for the selected microscope.
+        self.enable_stage_polling_var = None
+        #: HoverCheckButton: Available only for supported stage configurations.
+        self.stage_polling_enabled = None
 
         #: HoverCheckButton: Button to save the limits.
         self.save_button = None
@@ -391,17 +395,25 @@ class AdvancedStageParametersPopup:
                 fr.grid_rowconfigure(r, minsize=self.row_minsize)
 
         # Provide a checkbox to disable the stage limits.
-        self.enable_stage_limits_var = tk.BooleanVar()
+        controls = ttk.Frame(self.frame)
+        controls.grid(
+            row=2,
+            column=0,
+            columnspan=5,
+            sticky="w",
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
+        )
+        self.enable_stage_limits_var = tk.BooleanVar(master=self.frame)
         self.stage_limits_enabled = HoverCheckButton(
-            self.frame,
+            controls,
             text="Stage Limits Enabled",
             variable=self.enable_stage_limits_var,
             style="BodyBold.TCheckbutton",
         )
         self.stage_limits_enabled.grid(
-            row=2,
+            row=0,
             column=0,
-            columnspan=3,
             padx=get_theme_space_px(5),
             pady=get_theme_space_px(5),
             sticky="w",
@@ -409,6 +421,21 @@ class AdvancedStageParametersPopup:
         self.stage_limits_enabled.hover.setdescription(
             "Enable or disable the stage limits. If disabled, the limits will not be "
             "enforced."
+        )
+
+        self.enable_stage_polling_var = tk.BooleanVar(master=self.frame)
+        self.stage_polling_enabled = HoverCheckButton(
+            controls,
+            text="Stage Polling Enabled",
+            variable=self.enable_stage_polling_var,
+            style="BodyBold.TCheckbutton",
+        )
+        self.stage_polling_enabled.grid(
+            row=0,
+            column=1,
+            sticky="w",
+            padx=get_theme_space_px(5),
+            pady=get_theme_space_px(5),
         )
 
         # Save button.
@@ -443,6 +470,7 @@ class AdvancedStageParametersPopup:
 
         for widget_type in [
             self.stage_limits_enabled,
+            self.stage_polling_enabled,
             self.save_button,
         ]:
             if widget_type is not None:
@@ -462,4 +490,6 @@ class AdvancedStageParametersPopup:
 
         # Reset the widget variables to None
         self.stage_limits_enabled = None
+        self.stage_polling_enabled = None
+        self.enable_stage_polling_var = None
         self.save_button = None

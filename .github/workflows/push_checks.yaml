@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: 4702e695dcd2c3763a48e302d5a5837f9542002e
+          ref: a4dd815be72191f3a47d44647ed5f532e8efe050
       - name: Install Linux display dependencies
         if: runner.os == 'Linux'
         run: |

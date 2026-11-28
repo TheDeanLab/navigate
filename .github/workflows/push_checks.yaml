@@ -5,21 +5,16 @@ permissions:
   contents: read
 jobs:
   diagnose:
-    name: Worker startup (${{ matrix.case }})
+    name: Deterministic handoff (fixed=${{ matrix.fixed }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - case: coverage
-            coverage: ""
-          - case: no-coverage
-            coverage: "--no-cov"
+        fixed: [false, true]
     env:
       MPLBACKEND: Agg
       PYTHONPATH: src
-      COVERAGE_FILE: .coverage.linux310.diagnostic
     steps:
       - uses: actions/checkout@v7
       - name: Install Linux display dependencies
@@ -35,9 +30,26 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -c constraints/windows-py310.txt -e ".[dev]"
-      - name: Repeat focused order with worker metadata
+      - name: Serialize the waiter's initial permission check
+        if: matrix.fixed
         run: |
-          for iteration in 1 2 3 4 5; do
-            echo "Diagnostic iteration $iteration"
-            timeout --signal=TERM --kill-after=10s 180s xvfb-run -a python .github/ci/pr1276_hang_probe.py -p no:xvfb ${{ matrix.coverage }} --durations=5 -o faulthandler_timeout=45 test/controller/test_controller.py test/model/concurrency/test_concurrency_tools.py
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("src/navigate/model/concurrency/concurrency_tools.py")
+          text = p.read_text()
+          old = "waiting_list, _ = _get_list_and_lock(self.target_resource)"
+          before = "        if self is waiting_list[0] and self.permission_slip.locked():\n            self.permission_slip.release()  # We arrived to an empty waiting list\n"
+          after = "        with waiting_list_lock:\n            if self is waiting_list[0] and self.permission_slip.locked():\n                self.permission_slip.release()  # We arrived to an empty waiting list\n"
+          assert text.count(old) == 1
+          assert text.count(before) == 1
+          p.write_text(text.replace(old, "waiting_list, waiting_list_lock = _get_list_and_lock(self.target_resource)").replace(before, after))
+          PY
+      - name: Deterministic handoff regression
+        run: python -m pytest -p no:xvfb -p no:cov -o addopts= test/model/concurrency/test_custody_handoff.py -q
+      - name: Repeat controller and concurrency tests with the fix
+        if: matrix.fixed
+        run: |
+          for iteration in 1 2 3; do
+            echo "Fixed iteration $iteration"
+            timeout --signal=TERM --kill-after=10s 180s xvfb-run -a python -m pytest -p no:xvfb --durations=5 -o faulthandler_timeout=30 test/controller/test_controller.py test/model/concurrency/test_concurrency_tools.py test/model/concurrency/test_custody_handoff.py
           done

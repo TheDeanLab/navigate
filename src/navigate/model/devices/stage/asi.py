@@ -46,6 +46,7 @@ from navigate.model.devices.APIs.asi.asi_tiger_controller import (
     ASIException,
 )
 from navigate.tools.decorators import log_initialization
+from navigate.model.devices.stage.readback import StagePositionReadback
 
 # Logger Setup
 p = __name__.split(".")[1]
@@ -56,7 +57,7 @@ THETA_MOVE_TIMEOUT_SECONDS = 120.0
 
 
 @log_initialization
-class ASIStage(StageBase, SerialDevice, IntegratedDevice):
+class ASIStage(StageBase, SerialDevice, IntegratedDevice, StagePositionReadback):
     """Applied Scientific Instrumentation (ASI) Stage Class
 
     ASI Documentation: https://asiimaging.com/docs/products/serial_commands
@@ -246,6 +247,41 @@ class ASIStage(StageBase, SerialDevice, IntegratedDevice):
             logger.exception(f"ASI Stage - KeyError in get_axis_position: {e}")
             return float("inf")
         return pos
+
+    @property
+    def position_readback_identity(self) -> object:
+        """Return the controller shared by stage and other ASI devices."""
+        return self.asi_controller
+
+    def read_position_for_monitor(
+        self, peers: tuple[StagePositionReadback, ...] = ()
+    ) -> "dict[str, float] | None":
+        """Read physical positions without changing commanded/focus caches.
+
+        Parameters
+        ----------
+        peers : tuple[StagePositionReadback, ...]
+            Other stage wrappers sharing this controller.
+
+        Returns
+        -------
+        dict or None
+            Confirmed software-axis coordinates, or None when busy/unsupported.
+        """
+        stages = [self]
+        for peer in peers:
+            if not isinstance(peer, ASIStage):
+                return None
+            stages.append(peer)
+        axes = list(dict.fromkeys(axis for stage in stages for axis in stage.asi_axes))
+        positions = self.asi_controller.try_position_readback(axes)
+        if positions is None:
+            return None
+        return {
+            f"{axis}_pos": positions[hardware_axis] / (1000 if axis == "theta" else 10)
+            for stage in stages
+            for hardware_axis, axis in stage.asi_axes.items()
+        }
 
     def report_position(self) -> dict[str, float]:
         """Reports the position for all axes in microns, and create

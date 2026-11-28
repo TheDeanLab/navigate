@@ -205,6 +205,10 @@ class Controller:
         #: mp.Queue: Single-slot, latest-value transport for autofocus plotting.
         self.autofocus_progress_queue = mp.Queue(1)
 
+        #: mp.Queue: Replaceable idle stage readbacks, separate from control events.
+        self.stage_position_queue = mp.Queue(1)
+        self._stage_position_valid_after = time.monotonic()
+
         #: Manager: A shared memory manager
         self.manager = Manager()
 
@@ -242,6 +246,7 @@ class Controller:
                 self.configuration,
                 event_queue=self.event_queue,
                 autofocus_progress_queue=self.autofocus_progress_queue,
+                stage_position_queue=self.stage_position_queue,
                 log_queue=log_queue,
             )
         else:
@@ -251,6 +256,7 @@ class Controller:
                 self.configuration,
                 event_queue=self.event_queue,
                 autofocus_progress_queue=self.autofocus_progress_queue,
+                stage_position_queue=self.stage_position_queue,
                 log_queue=log_queue,
             )
 
@@ -414,6 +420,10 @@ class Controller:
         self.window_height = 0
         self.view.root.after(5000, self.enable_resize)
         self.view.root.bind("<Configure>", self.resize)
+        self.threads_pool.createThread(
+            resourceName="model",
+            target=lambda: self.model.start_stage_position_monitor(),
+        )
 
     def use_asi_model(self) -> bool:
         """Check if the model uses ASI hardware.
@@ -742,12 +752,18 @@ class Controller:
         """
         if not self._event_pump_running:
             return
-        self._drain_main_thread_dispatch_queue()
-        self.update_event()
-        if self._event_pump_running:
-            self._event_pump_after_id = self.view.root.after(
-                20, self._schedule_event_pump
-            )
+        try:
+            self._drain_main_thread_dispatch_queue()
+            self.update_event()
+            if hasattr(self, "stage_controller"):
+                self.stage_controller.refresh_position_telemetry_status()
+        except Exception:
+            logger.exception("GUI event-pump iteration failed; continuing")
+        finally:
+            if self._event_pump_running:
+                self._event_pump_after_id = self.view.root.after(
+                    20, self._schedule_event_pump
+                )
 
     def _stop_event_pump(self) -> None:
         """Stop the Tk event queue polling loop.
@@ -1297,6 +1313,8 @@ class Controller:
         if command == "laser_advanced_settings":
             self.dispatch_laser_advanced_settings(*args)
             return
+        # A queued readback must never overwrite a newer user command/target.
+        self._stage_position_valid_after = time.monotonic()
         if command in (
             "acquire",
             "acquire_and_save",
@@ -1330,11 +1348,25 @@ class Controller:
             args[0] : dict
                 dict = {'x': value, 'y': value, 'z': value, 'theta': value, 'f': value}
             """
-            self.threads_pool.createThread(
-                resourceName="model",
-                target=self.move_stage,
-                args=({args[1] + "_abs": args[0]},),
+            self._stage_position_moves_pending = (
+                getattr(self, "_stage_position_moves_pending", 0) + 1
             )
+
+            def finish_move() -> None:
+                self._stage_position_moves_pending -= 1
+                self._stage_position_valid_after = time.monotonic()
+
+            def move() -> None:
+                try:
+                    self.move_stage({args[1] + "_abs": args[0]})
+                finally:
+                    self._run_on_main_thread(finish_move)
+
+            try:
+                self.threads_pool.createThread(resourceName="model", target=move)
+            except Exception:
+                finish_move()
+                raise
 
         elif command == "stop_stage":
             """Creates a thread and uses it to call the model to stop stage"""
@@ -2281,6 +2313,33 @@ class Controller:
         # the duration of time remaining.
         self.acquire_bar_controller.framerate = frame_rate
 
+    def _update_idle_stage_position(self, snapshot: dict[str, Any]) -> None:
+        """Apply recent readbacks only to the currently idle microscope's GUI.
+
+        Parameters
+        ----------
+        snapshot : dict
+            Identity-tagged hardware telemetry from the model's single-slot queue.
+        """
+        # Supported CPython platforms use a system-wide monotonic clock. Model
+        # and GUI timestamps share that reference; they are never wall-clock time
+        # and must not be persisted or compared across machines/reboots.
+        if (
+            self.acquire_bar_controller.is_acquiring
+            or self.is_autofocusing
+            or getattr(self, "_stage_position_moves_pending", 0)
+            or not self.configuration_controller.microscope_config["stage"].get(
+                "position_polling", True
+            )
+            or snapshot["microscope_name"]
+            != self.configuration_controller.microscope_name
+            or snapshot["sample_started"]
+            <= getattr(self, "_stage_position_valid_after", 0.0)
+            or time.monotonic() - snapshot["sample_started"] > 5.0
+        ):
+            return
+        self.stage_controller.update_position_telemetry(snapshot)
+
     def update_event(self) -> None:
         """Update the View/Controller based on events from the Model.
 
@@ -2332,6 +2391,7 @@ class Controller:
                 break
 
             elif event == "update_stage":
+                self._stage_position_valid_after = time.monotonic()
                 for _ in range(10):
                     try:
                         self.update_stage_controller_silent(value)
@@ -2358,6 +2418,22 @@ class Controller:
                     self.event_listeners[event](value)
                 except Exception:
                     print(f"*** unhandled event: {event}, {value}")
+
+        # Control events take precedence over optional telemetry. In particular,
+        # a Stop Stages readback invalidates older queued monitor snapshots.
+        latest_stage = None
+        stage_queue = getattr(self, "stage_position_queue", None)
+        if stage_queue is not None:
+            while self._event_pump_running:
+                try:
+                    latest_stage = stage_queue.get_nowait()
+                except queue.Empty:
+                    break
+        if latest_stage is not None:
+            try:
+                self._update_idle_stage_position(latest_stage)
+            except Exception:
+                logger.exception("Ignoring failed optional stage telemetry update")
 
     def add_acquisition_mode(
         self, name: str, acquisition_obj: Callable[[str], Any]

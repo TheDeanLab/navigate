@@ -30,12 +30,14 @@
 
 # Standard Library Imports
 import logging
+import time
 from typing import Optional, TYPE_CHECKING
 
 # Third Party Imports
 
 # Local Imports
 from navigate.config.config import update_config_dict
+from navigate.config.stage_settings import stage_position_polling_supported
 from navigate.tools.file_functions import write_to_yaml
 from navigate.view.popups.stages_advanced_popup import AdvancedStageParametersPopup
 from navigate.controller.configuration_controller import ConfigurationController
@@ -157,6 +159,49 @@ class AdvancedStageParametersController:
             self.parent_controller.menu_controller.disable_stage_limits.set(0)
         else:
             self.parent_controller.menu_controller.disable_stage_limits.set(1)
+
+    def _polling_supported(self) -> bool:
+        """Check the selected microscope, including Virtual Devices mode."""
+        args = getattr(self.parent_controller, "args", None)
+        return stage_position_polling_supported(
+            self.stage_dict, bool(getattr(args, "synthetic_hardware", False))
+        )
+
+    def configure_stage_polling(self) -> None:
+        """Populate polling state without modifying an unsupported configuration."""
+        supported = self._polling_supported()
+        self.view.enable_stage_polling_var.set(
+            supported and self.stage_dict.get("position_polling", True)
+        )
+        self.view.stage_polling_enabled.configure(
+            state="normal" if supported else "disabled",
+            command=self.toggle_stage_polling,
+        )
+        self.view.stage_polling_enabled.hover.setdescription(
+            "Refresh supported stage positions once per second while idle. "
+            "Changes apply immediately; Save retains the setting."
+            if supported
+            else "Stage polling is available only for synthetic and ASI stages."
+        )
+
+    def toggle_stage_polling(self) -> None:
+        """Apply an idle polling preference immediately to the selected microscope."""
+        if not self._polling_supported():
+            self.configure_stage_polling()
+            return
+        enabled = bool(self.view.enable_stage_polling_var.get())
+        self.stage_dict["position_polling"] = enabled
+        self.parent_controller.configuration["configuration"]["microscopes"][
+            self.current_microscope
+        ]["stage"]["position_polling"] = enabled
+        if (
+            self.current_microscope
+            == self.parent_controller.configuration_controller.microscope_name
+        ):
+            # Discard any readback that began before this preference changed.
+            self.parent_controller._stage_position_valid_after = time.monotonic()
+            self.parent_controller.stage_controller.refresh_position_telemetry_settings()
+            self.parent_controller.stage_controller.refresh_position_telemetry_status()
 
     def flip_axis(self, axis: str) -> None:
         """Flip the stage axis in the configuration.
@@ -346,3 +391,4 @@ class AdvancedStageParametersController:
 
         # Checkbox trace for enabling/disabling stage limits.
         self.view.enable_stage_limits_var.trace_add("write", self.toggle_limits)
+        self.configure_stage_polling()

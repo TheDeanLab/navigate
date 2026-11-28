@@ -41,6 +41,7 @@ def _build_headless_controller():
             set_start_button=_InvokableButton(),
             set_end_button=_InvokableButton(),
         ),
+        advanced_settings_button=_InvokableButton(),
     )
     acquisition_stop_button = _InvokableButton()
     executed_commands = []
@@ -61,6 +62,9 @@ def _build_headless_controller():
             all_stage_axes=[],
         ),
         execute=executed_commands.append,
+        menu_controller=SimpleNamespace(
+            stage_limits_popup=lambda: executed_commands.append("advanced_stage")
+        ),
         view=SimpleNamespace(
             acquire_bar=SimpleNamespace(stop_stage=acquisition_stop_button)
         ),
@@ -93,3 +97,9 @@ def test_acquisition_bar_stop_button_click_dispatches_stop_stage():
     acquisition_stop_button.invoke()
 
     assert executed_commands == ["stop_stage"]
+
+
+def test_advanced_stage_shortcut_uses_existing_popup_command():
+    controller, _, _, commands = _build_headless_controller()
+    controller.stage_controller.view.advanced_settings_button.invoke()
+    assert commands == ["advanced_stage"]

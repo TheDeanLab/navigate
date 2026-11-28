@@ -40,11 +40,15 @@ from typing import Iterable, Optional
 # Third Party Imports
 
 # Local Imports
-from navigate.view.custom_widgets.hover import HoverTkButton, HoverButton
+from navigate.view.custom_widgets.hover import Hover, HoverTkButton, HoverButton
 from navigate.view.custom_widgets.LabelInputWidgetFactory import LabelInput
 from navigate.view.custom_widgets.validation import ValidatedSpinbox
 from navigate.view.custom_widgets.validation import ValidatedEntry
-from navigate.view.custom_widgets.common import configure_grid, themed_grid, uniform_grid
+from navigate.view.custom_widgets.common import (
+    configure_grid,
+    themed_grid,
+    uniform_grid,
+)
 from navigate.view.theme import get_theme_color, get_theme_space_px
 import navigate
 
@@ -168,15 +172,39 @@ class StageControlTab(tk.Frame):
             pady=("layout_panel_gap", "layout_section_gap"),
         )
 
-        #: StackShortcuts: Stack shortcuts.
-        self.stack_shortcuts = StackShortcuts(self)
+        #: ttk.Frame: Compact stack and stage-settings shortcuts.
+        self.shortcuts_frame = ttk.Frame(self)
         themed_grid(
-            self.stack_shortcuts,
+            self.shortcuts_frame,
             row=1,
             column=0,
             sticky=tk.NSEW,
             padx=("layout_panel_gap", "layout_section_gap"),
             pady=("layout_section_gap", "layout_panel_gap"),
+        )
+        self.shortcuts_frame.columnconfigure(0, weight=1)
+        #: StackShortcuts: Stack shortcuts.
+        self.stack_shortcuts = StackShortcuts(self.shortcuts_frame)
+        self.stack_shortcuts.grid(row=0, column=0, sticky="nsew")
+        #: ttk.LabelFrame: Quick access to the advanced stage parameters popup.
+        self.settings_shortcuts = ttk.LabelFrame(
+            self.shortcuts_frame, text="Stage Settings"
+        )
+        themed_grid(
+            self.settings_shortcuts,
+            row=1,
+            column=0,
+            sticky="nsew",
+            pady=("layout_section_gap", 0),
+        )
+        self.settings_shortcuts.columnconfigure(0, weight=1)
+        self.advanced_settings_button = HoverButton(
+            self.settings_shortcuts, text="Advanced Parameters"
+        )
+        self.advanced_settings_button.grid(row=0, column=0, sticky="ew")
+        self.advanced_settings_button.hover.setdescription(
+            "Open Advanced Stage Parameters to configure limits, polling, "
+            "home positions, offsets, and axis directions."
         )
 
         #: XYFrame: XY frame.
@@ -278,8 +306,7 @@ class StageControlTab(tk.Frame):
                 self,
                 f"{name}",
                 tk.PhotoImage(
-                    master=self,
-                    file=image_directory.joinpath("images", f"{name}.png")
+                    master=self, file=image_directory.joinpath("images", f"{name}.png")
                 ).subsample(2, 2),
             )
 
@@ -663,7 +690,50 @@ class PositionFrame(ttk.Labelframe):
         for i in range(len(entry_names)):
             self.add_position_entry(entry_names[i], entry_labels[i])
 
+        #: tk.Canvas: Refresh lamp anchored to the native frame heading.
+        size = get_theme_space_px(16)
+        self.polling_indicator = tk.Canvas(
+            self,
+            width=size,
+            height=size,
+            highlightthickness=0,
+            borderwidth=0,
+            background=get_theme_color("panel_bg", "#1a212b"),
+        )
+        # Placement leaves the native title and its size request unchanged.
+        self.polling_indicator.place(
+            relx=1.0, x=-get_theme_space_px(8), y=0, anchor="ne", bordermode="ignore"
+        )
+        inset = get_theme_space_px(3)
+        self._polling_lamp = self.polling_indicator.create_oval(
+            inset,
+            inset,
+            size - inset,
+            size - inset,
+            outline=get_theme_color("muted_text", "#9aa8bb"),
+            fill=get_theme_color("border", "#2f3a4a"),
+        )
+        self.polling_indicator.hover = Hover(self.polling_indicator)
+        self.polling_indicator.hover.setdescription("Stage position polling: waiting")
         uniform_grid(self)
+
+    def set_polling_indicator(self, refreshing: bool, description: str) -> None:
+        """Show a refresh pulse and expose the detailed state on hover.
+
+        Parameters
+        ----------
+        refreshing : bool
+            True briefly after a successful hardware readback.
+        description : str
+            Explanation of the current state for the tooltip.
+        """
+        color = (
+            get_theme_color("success", "#4f8a5b")
+            if refreshing
+            else get_theme_color("border", "#2f3a4a")
+        )
+        self.polling_indicator.itemconfigure(self._polling_lamp, fill=color)
+        self.polling_indicator.hover.setdescription(description)
 
     def get_widgets(self) -> dict:
         """Get all widgets in the position frame
@@ -750,7 +820,7 @@ class PositionFrame(ttk.Labelframe):
                 "takefocus": False,
             },
         )
-        self.inputs[entry_name].grid(row=len(self.inputs), column=0, sticky=tk.EW)
+        self.inputs[entry_name].grid(row=len(self.inputs) - 1, column=0, sticky=tk.EW)
 
         uniform_grid(self)
 

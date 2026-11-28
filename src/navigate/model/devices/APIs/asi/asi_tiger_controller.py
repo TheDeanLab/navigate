@@ -31,6 +31,7 @@
 
 # Standard Imports
 import threading
+import math
 import time
 import logging
 
@@ -147,6 +148,8 @@ class TigerController:
 
         #: threading.Lock: Exclusive ownership of a complete command/reply pair.
         self._transaction_lock = threading.Lock()
+        self._transaction_admission_lock = threading.Lock()
+        self._transaction_waiters = 0
         #: int | None: Thread awaiting the reply to its command.
         self._transaction_owner: int | None = None
 
@@ -390,9 +393,63 @@ class TigerController:
 
     def _begin_transaction(self) -> None:
         """Reserve the serial connection until this thread consumes its reply."""
-        self._transaction_lock.acquire()
+        with self._transaction_admission_lock:
+            self._transaction_waiters += 1
+        try:
+            self._transaction_lock.acquire()
+        finally:
+            with self._transaction_admission_lock:
+                self._transaction_waiters -= 1
         self._transaction_owner = threading.get_ident()
         self.safe_to_write.clear()
+
+    def try_position_readback(self, axes: list[str]) -> "dict[str, float] | None":
+        """Attempt one bounded WHERE transaction without delaying queued commands.
+
+        Parameters
+        ----------
+        axes : list[str]
+            Physical axes to read together, in the controller's known order.
+
+        Returns
+        -------
+        dict or None
+            Confirmed coordinates in ASI units, or None for a busy connection or
+            unsupported timeout/axis configuration. Invalid replies raise instead
+            of returning cached coordinates. Existing serial timeouts are preserved.
+        """
+        if not self.default_axes_sequence or not axes:
+            return None
+        ordered = [axis for axis in self.default_axes_sequence if axis in axes]
+        if set(ordered) != set(axes):
+            return None
+        with self._transaction_admission_lock:
+            if self._transaction_waiters or not self._transaction_lock.acquire(False):
+                return None
+        self._transaction_owner = threading.get_ident()
+        self.safe_to_write.clear()
+        try:
+            # Never alter the timeout of a connection shared with other devices.
+            # One read plus one write is bounded by two seconds with these limits.
+            for timeout in (self.serial.timeout, self.serial.write_timeout):
+                if not isinstance(timeout, (int, float)) or not 0 < timeout <= 1:
+                    return None
+            self.serial.reset_input_buffer()
+            command = f"WHERE {' '.join(ordered)}\r".encode("ascii")
+            if self.serial.write(command) != len(command):
+                raise ASIException("Incomplete position query write")
+            response = self.serial.read_until(b"\n", 256)
+            if not response.endswith(b"\n"):
+                raise ASIException("Incomplete position query reply")
+            fields = response.decode("ascii").split()
+            if len(fields) != len(ordered) + 1 or fields[0] != ":A":
+                raise ASIException("Invalid position query reply")
+            positions = dict(zip(ordered, map(float, fields[1:])))
+            if not all(math.isfinite(value) for value in positions.values()):
+                raise ASIException("Nonfinite position query reply")
+            return positions
+        finally:
+            self._end_transaction()
 
     def _end_transaction(self) -> None:
         """Release a completed or failed transaction, including waiting callers."""

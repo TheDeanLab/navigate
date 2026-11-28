@@ -88,6 +88,7 @@ def test_profile_override_is_inherited_by_spawn(
         "unlink",
         "replace",
         "symlink",
+        "hardlink",
         "mkdir",
         "chmod",
         "utime",
@@ -142,6 +143,12 @@ try:
     elif operation == "chmod": target.chmod(0o600)
     elif operation == "utime": os.utime(target, None)
     elif operation == "truncate": os.truncate(target, 0)
+    elif operation == "hardlink":
+        alias = target.with_name("alias.yml")
+        if hasattr(alias, "hardlink_to"):
+            alias.hardlink_to(replacement)
+        else:
+            Path(replacement).link_to(alias)
     elif operation == "symlink":
         alias = Path(replacement).with_name("alias")
         alias.symlink_to(target)

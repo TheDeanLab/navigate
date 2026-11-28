@@ -57,8 +57,10 @@ class ProfileWriteGuard:
             # Match by identity: its open function is os.open on 3.9 and
             # io.open on 3.10, with different call signatures.
             accessor = getattr(Path, "_accessor", None)
-            if accessor is not None and getattr(accessor, name, None) is original:
-                self._patches.setattr(accessor, name, wrapper)
+            if accessor is not None:
+                for alias in (name, "link_to") if name == "link" else (name,):
+                    if getattr(accessor, alias, None) is original:
+                        self._patches.setattr(accessor, alias, wrapper)
             if module is os:
                 for attribute in (
                     "supports_dir_fd",
@@ -118,7 +120,9 @@ class ProfileWriteGuard:
             "rmdir",
             "mkdir",
             "chmod",
+            "lchmod",
             "chown",
+            "lchown",
             "utime",
             "truncate",
         ):

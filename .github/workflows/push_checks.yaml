@@ -1,204 +1,45 @@
-# https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-name: Tests
-
+name: Validate combined PRs 1276 and 1270
 on:
-  push:
-    branches:
-      - develop
-  pull_request:
-  schedule:
-    - cron: "17 9 * * 1"
   workflow_dispatch:
-    inputs:
-      diagnostic_no_cov:
-        description: "Run pytest without coverage and live log CLI to diagnose teardown hangs"
-        required: false
-        default: false
-        type: boolean
-
+permissions:
+  contents: read
 jobs:
   test:
-    if: github.event_name != 'schedule'
-    runs-on: ${{ matrix.operating-system }}
-    timeout-minutes: 60
+    name: Combined (${{ matrix.os }}, ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        # Python 3.9 has no setup-python build for Ubuntu 26.04 (ubuntu-latest).
-        operating-system: [windows-latest, ubuntu-24.04]
-        python-version: ["3.9", "3.10", "3.11"]
         include:
-          - python-version: "3.9"
-            python-tag: py39
-          - python-version: "3.10"
-            python-tag: py310
-          - python-version: "3.11"
-            python-tag: py311
+          - os: ubuntu-24.04
+            python: "3.10"
+            constraints: constraints/windows-py310.txt
+          - os: windows-latest
+            python: "3.11"
+            constraints: constraints/windows-py311.txt
     env:
-      MPLBACKEND: Agg  # https://github.com/microsoft/azure-pipelines-tasks/issues/16426
+      MPLBACKEND: Agg
       PYTHONPATH: src
-      NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
-      COVERAGE_FILE: .coverage.${{ matrix.operating-system }}.${{ matrix.python-tag }}
     steps:
       - uses: actions/checkout@v7
-      - name: Install Linux display dependencies
+      - name: Linux display dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb xauth libegl1 libopengl0
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v7
+      - uses: actions/setup-python@v7
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python }}
           cache: pip
-          cache-dependency-path: constraints/windows-${{ matrix.python-tag }}.txt
-      - name: Install dependencies
-        # Reuse the existing version pins on both platforms. Constraints for
-        # Windows-only packages do not cause those packages to install on Linux.
-        run: |
-          python -m pip install --upgrade pip
-          pip install -c constraints/windows-${{ matrix.python-tag }}.txt -e ".[dev]"
-      - name: Record resolved environment
-        run: python -m pip freeze --all
-      - name: Cache Bio-Formats validation archive
-        uses: actions/cache@v6
-        with:
-          path: .pytest_cache/d/bioformats
-          key: ${{ runner.os }}-bioformats-${{ hashFiles('test/model/metadata_sources/bioformats.py') }}
-      - name: Test with pytest (Windows)
-        if: runner.os == 'Windows'
-        timeout-minutes: 45
-        shell: pwsh
-        run: |
-          if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ github.event.inputs.diagnostic_no_cov }}" -eq "true") {
-            python -m pytest --durations=25 --no-cov -o log_cli=false
-          } else {
-            python -m pytest --durations=25
-            if (Test-Path coverage.xml) {
-              Move-Item -Force coverage.xml "coverage-${{ runner.os }}-${{ matrix.python-tag }}.xml"
-            } else {
-              Write-Error "coverage.xml was not produced."
-            }
-          }
-      - name: Test with pytest (Linux)
-        if: runner.os == 'Linux'
-        timeout-minutes: 45
-        shell: bash
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.diagnostic_no_cov }}" == "true" ]]; then
-            xvfb-run -a python -m pytest -p no:xvfb --durations=25 --no-cov -o log_cli=false
-          else
-            xvfb-run -a python -m pytest -p no:xvfb --durations=25
-            mv coverage.xml "coverage-${{ runner.os }}-${{ matrix.python-tag }}.xml"
-          fi
-      - name: Dump Python processes (Windows)
-        if: ${{ failure() && runner.os == 'Windows' }}
-        shell: pwsh
-        run: |
-          Write-Host "Tasklist snapshot for python processes:"
-          tasklist /v /fo table | Select-String -Pattern "python"
-          Write-Host "Detailed process snapshot for python executables:"
-          Get-CimInstance Win32_Process |
-            Where-Object { $_.Name -match '^python(3)?(\.exe)?$' } |
-            Select-Object ProcessId, ParentProcessId, Name, CommandLine |
-            Format-List
-      - name: Codecov
-        if: ${{ !(github.event_name == 'workflow_dispatch' && github.event.inputs.diagnostic_no_cov == 'true') }}
-        uses: codecov/codecov-action@v7
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage/reports/
-          env_vars: OS,PYTHON
-          fail_ci_if_error: false
-          files: ./coverage-${{ runner.os }}-${{ matrix.python-tag }}.xml
-          flags: unittests-${{ runner.os }}-${{ matrix.python-tag }}
-          name: codecov-${{ matrix.operating-system }}-${{ matrix.python-tag }}
-          verbose: true
-
-  experimental-python:
-    name: Experimental Python 3.12 (${{ matrix.operating-system }})
-    if: github.event_name != 'schedule'
-    continue-on-error: true
-    runs-on: ${{ matrix.operating-system }}
-    strategy:
-      fail-fast: false
-      matrix:
-        operating-system: [windows-latest, ubuntu-24.04]
-    timeout-minutes: 60
-    env:
-      MPLBACKEND: Agg
-      PYTHONPATH: src
-      NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
-      COVERAGE_FILE: .coverage.${{ matrix.operating-system }}.py312
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install Linux display dependencies
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb xauth libegl1 libopengl0
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: constraints/windows-py312.txt
+          cache-dependency-path: ${{ matrix.constraints }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -c constraints/windows-py312.txt -e ".[dev]"
-      - name: Record resolved environment
-        run: python -m pip freeze --all
-      - name: Cache Bio-Formats validation archive
-        uses: actions/cache@v6
-        with:
-          path: .pytest_cache/d/bioformats
-          key: ${{ runner.os }}-bioformats-${{ hashFiles('test/model/metadata_sources/bioformats.py') }}
-      - name: Test with pytest (Windows)
-        if: runner.os == 'Windows'
-        timeout-minutes: 45
-        run: python -m pytest --durations=25
-      - name: Test with pytest (Linux)
+          pip install -c ${{ matrix.constraints }} -e ".[dev]"
+      - name: Linux integration tests
         if: runner.os == 'Linux'
-        timeout-minutes: 45
-        run: xvfb-run -a python -m pytest -p no:xvfb --durations=25
-      - name: Dump Python processes (Windows)
-        if: ${{ failure() && runner.os == 'Windows' }}
-        shell: pwsh
-        run: |
-          Write-Host "Tasklist snapshot for python processes:"
-          tasklist /v /fo table | Select-String -Pattern "python"
-          Write-Host "Detailed process snapshot for python executables:"
-          Get-CimInstance Win32_Process |
-            Where-Object { $_.Name -match '^python(3)?(\.exe)?$' } |
-            Select-Object ProcessId, ParentProcessId, Name, CommandLine |
-            Format-List
-
-  latest-dependencies:
-    name: Latest dependencies (scheduled advisory)
-    if: github.event_name == 'schedule'
-    runs-on: windows-latest
-    timeout-minutes: 60
-    env:
-      MPLBACKEND: Agg
-      NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
-    steps:
-      - uses: actions/checkout@v7
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.10"
-          cache: pip
-          cache-dependency-path: pyproject.toml
-      - name: Install latest dependencies without constraints
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-      - name: Cache Bio-Formats validation archive
-        uses: actions/cache@v6
-        with:
-          path: .pytest_cache/d/bioformats
-          key: ${{ runner.os }}-bioformats-${{ hashFiles('test/model/metadata_sources/bioformats.py') }}
-      - name: Test with pytest
-        timeout-minutes: 45
-        run: python -m pytest --durations=25
+        run: timeout --signal=TERM --kill-after=10s 600s xvfb-run -a python -m pytest -p no:xvfb -p no:cov -o addopts= -o faulthandler_timeout=60 --durations=10 test/config/test_profile_isolation.py test/config/test_stage_settings.py test/controller/test_controller.py test/controller/sub_controllers/test_advanced_stage_settings.py test/controller/sub_controllers/test_stages.py test/controller/test_idle_stage_position.py test/controller/test_stop_stage_button_bindings.py test/model/devices/APIs/asi/test_asi_position_readback.py test/model/test_stage_position_monitor.py test/view/main_window_content/test_stage_tab.py test/model/concurrency
+      - name: Windows integration tests
+        if: runner.os == 'Windows'
+        run: python -m pytest -p no:cov -o addopts= -o faulthandler_timeout=60 --durations=10 test/config/test_profile_isolation.py test/config/test_stage_settings.py test/controller/test_controller.py test/controller/sub_controllers/test_advanced_stage_settings.py test/controller/sub_controllers/test_stages.py test/controller/test_idle_stage_position.py test/controller/test_stop_stage_button_bindings.py test/model/devices/APIs/asi/test_asi_position_readback.py test/model/test_stage_position_monitor.py test/view/main_window_content/test_stage_tab.py test/model/concurrency

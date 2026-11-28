@@ -53,6 +53,12 @@ class ProfileWriteGuard:
         def patch(module: Any, name: str, wrapper: Callable[..., Any]) -> None:
             original = getattr(module, name)
             self._patches.setattr(module, name, functools.wraps(original)(wrapper))
+            # Python 3.9/3.10 pathlib caches file functions in an accessor.
+            # Match by identity: its open function is os.open on 3.9 and
+            # io.open on 3.10, with different call signatures.
+            accessor = getattr(Path, "_accessor", None)
+            if accessor is not None and getattr(accessor, name, None) is original:
+                self._patches.setattr(accessor, name, wrapper)
             if module is os:
                 for attribute in (
                     "supports_dir_fd",

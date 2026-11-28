@@ -13,6 +13,7 @@ jobs:
       matrix:
         include:
           - {os: ubuntu-24.04, python: "3.10", tag: py310}
+          - {os: windows-latest, python: "3.9", tag: py39}
           - {os: windows-latest, python: "3.11", tag: py311}
           - {os: ubuntu-24.04, python: "3.12", tag: py312}
     env:
@@ -22,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: b946eb3cfa07148ed77faa62f39990780e74c077
+          ref: 61803e804d087e97d114c5c1fb8dadc8de1daefe
       - name: Install Linux display dependencies
         if: runner.os == 'Linux'
         run: |

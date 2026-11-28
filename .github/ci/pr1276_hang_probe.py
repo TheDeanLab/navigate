@@ -8,6 +8,8 @@ from typing import Any, Generator
 
 import pytest
 
+DIAGNOSTIC_STREAM = os.fdopen(os.dup(2), "w", buffering=1)
+
 
 class Probe:
     """Print uncaught worker errors and stop a stalled diagnostic session."""
@@ -20,15 +22,18 @@ class Probe:
         previous_hook = threading.excepthook
 
         def report(args: threading.ExceptHookArgs) -> None:
-            print("\nWORKER EXCEPTION:", file=sys.__stderr__, flush=True)
+            print("\nWORKER EXCEPTION:", file=DIAGNOSTIC_STREAM, flush=True)
             traceback.print_exception(
-                args.exc_type, args.exc_value, args.exc_traceback, file=sys.__stderr__
+                args.exc_type,
+                args.exc_value,
+                args.exc_traceback,
+                file=DIAGNOSTIC_STREAM,
             )
-            sys.__stderr__.flush()
+            DIAGNOSTIC_STREAM.flush()
             previous_hook(args)
 
         def snapshot() -> None:
-            print("\nQUEUE OWNERSHIP AT HANG:", file=sys.__stderr__, flush=True)
+            print("\nQUEUE OWNERSHIP AT HANG:", file=DIAGNOSTIC_STREAM, flush=True)
             frame = sys._current_frames().get(threading.main_thread().ident)
             while (
                 frame is not None and frame.f_code.co_name != "test_lock_with_waitlist"
@@ -43,9 +48,11 @@ class Probe:
                     print(
                         name,
                         [indices.get(id(custody)) for custody in resource.waiting_list],
-                        file=sys.__stderr__,
+                        file=DIAGNOSTIC_STREAM,
                     )
-                print("usage_record", values.get("usage_record"), file=sys.__stderr__)
+                print(
+                    "usage_record", values.get("usage_record"), file=DIAGNOSTIC_STREAM
+                )
                 for i, thread in enumerate(threads):
                     if not thread.is_alive() or thread.custody.has_custody:
                         print(
@@ -63,9 +70,9 @@ class Probe:
                             ),
                             "exception",
                             repr(getattr(thread, "exc_value", None)),
-                            file=sys.__stderr__,
+                            file=DIAGNOSTIC_STREAM,
                         )
-            sys.__stderr__.flush()
+            DIAGNOSTIC_STREAM.flush()
             os._exit(124)
 
         threading.excepthook = report

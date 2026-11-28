@@ -81,8 +81,10 @@ def test_profile_override_is_inherited_by_spawn(
     [
         "write",
         "append",
+        "builtin_open",
         "file_io",
         "os_open",
+        "dir_fd",
         "unlink",
         "replace",
         "symlink",
@@ -98,6 +100,8 @@ def test_write_guard_blocks_mutations(tmp_path: Path, operation: str) -> None:
     protected.mkdir()
     target = protected / "experiment.yml"
     target.write_text("original settings")
+    if operation == "dir_fd" and os.open not in os.supports_dir_fd:
+        pytest.skip("Directory-relative open is unavailable")
     if operation == "symlink":
         # Windows may require developer mode or elevated symlink privileges.
         probe = tmp_path / "symlink-probe"
@@ -122,7 +126,15 @@ try:
     if operation == "write": target.write_text("changed")
     elif operation == "append":
         with target.open("a") as stream: stream.write("changed")
+    elif operation == "builtin_open":
+        with open(target, "w") as stream: stream.write("changed")
     elif operation == "os_open": os.open(target, os.O_WRONLY | os.O_TRUNC)
+    elif operation == "dir_fd":
+        descriptor = os.open(protected, os.O_RDONLY)
+        try:
+            os.open("experiment.yml", os.O_WRONLY | os.O_TRUNC, dir_fd=descriptor)
+        finally:
+            os.close(descriptor)
     elif operation == "file_io": io.FileIO(target, "w")
     elif operation == "unlink": target.unlink()
     elif operation == "replace": os.replace(replacement, target)

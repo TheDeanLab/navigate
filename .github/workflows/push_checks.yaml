@@ -8,9 +8,15 @@ permissions:
 
 jobs:
   diagnose:
+    name: Garbage collection ${{ matrix.collect_gui_garbage }}
+    strategy:
+      fail-fast: false
+      matrix:
+        collect_gui_garbage: ["0", "1"]
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
+      NAVIGATE_DIAGNOSTIC_GC: ${{ matrix.collect_gui_garbage }}
       MPLBACKEND: Agg
       PYTHONPATH: src
       NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"

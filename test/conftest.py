@@ -64,11 +64,7 @@ def pytest_configure(config: pytest.Config) -> None:
     os.environ["NAVIGATE_HOME"] = str(Path(sandbox.name) / ".navigate")
     guard = ProfileWriteGuard(protected)
     config.stash[_PROFILE_GUARD] = guard
-    audit_mode = os.environ.get("NAVIGATE_AUDIT_DIAGNOSTIC", "normal")
-    if audit_mode == "traceable":
-        guard.__cantrace__ = True
-    if audit_mode != "skip":
-        sys.addaudithook(guard)
+    sys.addaudithook(guard)
 
     def cleanup() -> None:
         # Windows cannot remove profile logs while FileHandlers still own them.

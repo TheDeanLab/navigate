@@ -37,9 +37,10 @@ class ProfileWriteGuard:
         another thread's coverage/debugger startup fail before its target runs.
         Use reversible filesystem API wrappers on those interpreters instead.
         """
-        if sys.implementation.name == "cpython" and sys.version_info < (3, 12):
-            self._install_wrappers()
-        else:
+        # The open audit event omits dir_fd, so wrappers are also needed on
+        # newer runtimes to resolve directory-relative writes correctly.
+        self._install_wrappers()
+        if sys.implementation.name != "cpython" or sys.version_info >= (3, 12):
             sys.addaudithook(self)
 
     def close(self) -> None:

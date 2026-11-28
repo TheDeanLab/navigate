@@ -1,22 +1,26 @@
-name: Diagnose PR 1276 Linux Python 3.10
+name: Diagnose remaining Python 3.10 CI stall
 on:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   diagnose:
-    name: Deterministic handoff (fixed=${{ matrix.fixed }})
+    name: Bounded joins (coverage=${{ matrix.coverage }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        fixed: [false, true]
+        coverage: ["normal", "disabled"]
     env:
       MPLBACKEND: Agg
       PYTHONPATH: src
+      NAVIGATE_RUN_PLUGIN_INTEGRATION: "1"
+      COVERAGE_FILE: .coverage.ubuntu-24.04.py310
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ef3994c265c0fb52daf9eb8ac7280bc3c6bf5aaa
       - name: Install Linux display dependencies
         run: |
           sudo apt-get update
@@ -30,26 +34,27 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -c constraints/windows-py310.txt -e ".[dev]"
-      - name: Serialize the waiter's initial permission check
-        if: matrix.fixed
+      - name: Cache Bio-Formats validation archive
+        uses: actions/cache@v6
+        with:
+          path: .pytest_cache/d/bioformats
+          key: ${{ runner.os }}-bioformats-${{ hashFiles('test/model/metadata_sources/bioformats.py') }}
+      - name: Bound the join so pytest reports captured worker exceptions
         run: |
           python - <<'PY'
           from pathlib import Path
-          p = Path("src/navigate/model/concurrency/concurrency_tools.py")
+          p = Path("test/model/concurrency/test_concurrency_tools.py")
           text = p.read_text()
-          old = "waiting_list, _ = _get_list_and_lock(self.target_resource)"
-          before = "        if self is waiting_list[0] and self.permission_slip.locked():\n            self.permission_slip.release()  # We arrived to an empty waiting list\n"
-          after = "        with waiting_list_lock:\n            if self is waiting_list[0] and self.permission_slip.locked():\n                self.permission_slip.release()  # We arrived to an empty waiting list\n"
+          old = "    for th in threads:\n        th.get_result()\n"
+          new = "    for th in threads:\n        th.get_result(timeout=10)\n        assert not th.is_alive(), [(t._args, vars(t), vars(t.custody)) for t in threads if not t.is_alive() and t.custody.target_resource is not None]\n"
           assert text.count(old) == 1
-          assert text.count(before) == 1
-          p.write_text(text.replace(old, "waiting_list, waiting_list_lock = _get_list_and_lock(self.target_resource)").replace(before, after))
+          p.write_text(text.replace(old, new))
           PY
-      - name: Deterministic handoff regression
-        run: python -m pytest -p no:xvfb -p no:cov -o addopts= test/model/concurrency/test_custody_handoff.py -q
-      - name: Repeat controller and concurrency tests with the fix
-        if: matrix.fixed
+      - name: Full test order with bounded concurrency joins
+        shell: bash
         run: |
-          for iteration in 1 2 3; do
-            echo "Fixed iteration $iteration"
-            timeout --signal=TERM --kill-after=10s 180s xvfb-run -a python -m pytest -p no:xvfb --durations=5 -o faulthandler_timeout=30 test/controller/test_controller.py test/model/concurrency/test_concurrency_tools.py test/model/concurrency/test_custody_handoff.py
-          done
+          if [[ "${{ matrix.coverage }}" == "disabled" ]]; then
+            timeout --signal=TERM --kill-after=10s 1800s xvfb-run -a python -m pytest -p no:xvfb --no-cov --maxfail=1 --durations=25 -o faulthandler_timeout=60
+          else
+            timeout --signal=TERM --kill-after=10s 1800s xvfb-run -a python -m pytest -p no:xvfb --maxfail=1 --durations=25 -o faulthandler_timeout=60
+          fi
